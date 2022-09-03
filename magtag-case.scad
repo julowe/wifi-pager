@@ -84,13 +84,39 @@ gasket_screen_visible_z = gasket_screen_visible_void_z;
 
 pcb_button_neg_y_offset = 2.1; //2.15 - 2.25 measured, so want a bit less to give it a margin
 pcb_button_block_neg_y_offset = 1;
-gasket_button_block_x = 63;
+
+//first button, starting on left is D15, then D14, D12, D11
+button_D15_pcb_edge_neg_x_offset = 12.25; //12.3 measured
+button_D15_center_pcb_edge_neg_x_offset = 15; //15 caliper estimate
+//button_D14_D15_neg_x_offset = 10.3; //10.35 measured (same as other var for distance between buttons, just not used)
+button_D14_center_pcb_edge_neg_x_offset = 31.5; // caliper estimate
+button_D12_center_pcb_edge_neg_x_offset = 48.5; // caliper estimate
+button_D11_center_pcb_edge_neg_x_offset = 65; // caliper estimate
+
+
+gasket_individual_button_wall_x = extrusion_width_tpu_min*3;
+//gasket_button_block_x = 63;
+//gasket_button_block_x = button_D11_center_pcb_edge_neg_x_offset-button_D15_pcb_edge_neg_x_offset + button_x/2*2 + gasket_individual_button_wall_x*1;
+gasket_button_block_x = 56 + gasket_individual_button_wall_x*3; //outer buttons, edge to edge calipered at just under 56, and 3 walls instead of 2 jsut for a little more margin
 gasket_button_block_neg_y_offset = pcb_button_neg_y_offset - extrusion_width_tpu_min;
 //gasket_button_block_y = gasket_screen_pcb_neg_y_offset - gasket_button_block_neg_y_offset;
 gasket_button_block_y = button_y + extrusion_width_tpu_min*2;
 
+
+//button_D15_center_pcb_edge_neg_x_offset-button_x/2
+
+
+
+
 //gasket_button_block_z = 5.5;
 gasket_button_block_z = button_z + 0.6; //idea: 2 or 3 layers, todo put in layer height variable
+
+
+
+
+//about 10.3 between buttons. so say 10
+button_button_x_offset = 10;
+button_button_void_x = button_button_x_offset - gasket_individual_button_wall_x*2;
 
 gasket_void_lights_x = 60;
 gasket_void_lights_y = gasket_screen_pcb_neg_y_offset;
@@ -186,12 +212,6 @@ module gasket_screen(){
                 rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
             }
             
-//            //upper level of gasket that is squished against screen
-//            translate([0, gasket_screen_pcb_neg_y_offset, gasket_case_z]){
-//                cube([pcb_x, pcb_y - gasket_screen_pcb_neg_y_offset*2, gasket_screen_visible_z]);
-//            }
-            
-            
             //big block for buttons 
             translate([pcb_x/2 - gasket_button_block_x/2, gasket_button_block_neg_y_offset, 0]){
                 cube([gasket_button_block_x, gasket_button_block_y, gasket_button_block_z]);
@@ -206,19 +226,9 @@ module gasket_screen(){
         translate([pcb_x/2 - gasket_screen_void_x/2 + screen_visible_void_x_inset_from_screen_neg_x_edge, pcb_y/2 - gasket_screen_void_y/2 + screen_visible_void_y_inset_from_screen_neg_y_edge, gasket_case_z]){
             cube([gasket_screen_visible_void_x, gasket_screen_visible_void_y, gasket_screen_visible_void_z]);
         }
-            
-
-        
-        //remove area for buttons themselves 
-        //first button, starting on left is D15, then D14, D12, D11
-        button_D15_pcb_edge_neg_x_offset = 12.25; //12.3 measured
-        button_D15_center_pcb_edge_neg_x_offset = 15; //15 caliper estimate
-        button_D14_D15_neg_x_offset = 12.25; //10.35 measured
-        button_D14_center_pcb_edge_neg_x_offset = 32; // caliper estimate
-        button_D12_center_pcb_edge_neg_x_offset = 48; // caliper estimate
-        button_D11_center_pcb_edge_neg_x_offset = 65; // caliper estimate
         
         
+        //remove area for buttons themselves
         translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2, pcb_button_neg_y_offset, 0]){
             button();
         }
@@ -232,11 +242,7 @@ module gasket_screen(){
             button();
         }
         
-        //remove area between buttons todo - maybe not? just have one big button bar?
-        //about 10.3 between buttons. so say 10
-        button_button_x_offset = 10;
-        button_button_void_x = button_button_x_offset - extrusion_width_tpu_min*2*3;
-        
+        //remove area between buttons
         translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
             cube([button_button_void_x, gasket_button_block_y, 15]);
         }
@@ -246,13 +252,7 @@ module gasket_screen(){
         translate([(button_D12_center_pcb_edge_neg_x_offset+button_D11_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
             cube([button_button_void_x, gasket_button_block_y, 15]);
         }
-        
-        
-        
-        
-        
-        
-        
+
         
         //remove area for screws to go through
         //neg x neg y
