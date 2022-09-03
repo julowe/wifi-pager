@@ -1,5 +1,6 @@
 //magtag case
 
+//https://openhome.cc/eGossip/OpenSCAD/lib3x-rounded_square.html
 use <../dotSCAD/src/rounded_cube.scad>;
 use <../dotSCAD/src/rounded_square.scad>
 
@@ -15,7 +16,14 @@ standoff_difference_y = 45.5;
 standoff_diameter = 5.5;
 standoff_pcb_edge_offset = 1;
 
+
+button_x = 6.5; //6.1 measured
+button_y = 4; //3.62 measured
+button_z = 4.5; //4.36 measured
+
+
 bolt_diam = 3;
+//bolt_diam_tpu = bolt_diam - 0.25 + 2.45+3; //used to show heatset insert and wall diam
 bolt_diam_tpu = bolt_diam - 0.25;
 
 
@@ -74,11 +82,15 @@ gasket_screen_visible_z = gasket_screen_visible_void_z;
 
 
 
-pcb_button_neg_y_offset = 2;
+pcb_button_neg_y_offset = 2.1; //2.15 - 2.25 measured, so want a bit less to give it a margin
+pcb_button_block_neg_y_offset = 1;
 gasket_button_block_x = 63;
 gasket_button_block_neg_y_offset = pcb_button_neg_y_offset - extrusion_width_tpu_min;
-gasket_button_block_y = gasket_screen_pcb_neg_y_offset - gasket_button_block_neg_y_offset;
-gasket_button_block_z = 5.5;
+//gasket_button_block_y = gasket_screen_pcb_neg_y_offset - gasket_button_block_neg_y_offset;
+gasket_button_block_y = button_y + extrusion_width_tpu_min*2;
+
+//gasket_button_block_z = 5.5;
+gasket_button_block_z = button_z + 0.6; //idea: 2 or 3 layers, todo put in layer height variable
 
 gasket_void_lights_x = 60;
 gasket_void_lights_y = gasket_screen_pcb_neg_y_offset;
@@ -111,14 +123,19 @@ gasket_lip_void_z = gasket_case_void_z;
 
 
 
-heatset_insert_diameter = 5; //todo verify diam size on test print piece
+heatset_insert_diameter = 5.2;
 heatset_insert_height = 5;
 
-
+//
+//
 //start rendering things
+//
+//
 
 //gasket_case();
 gasket_screen();
+
+//button();
 
 translate([0, 0, gasket_case_z*1]){
 //    case_top();
@@ -136,7 +153,7 @@ module gasket_case(){
                 rounded_square(size = [gasket_case_x, gasket_case_y], corner_r = case_rounding_rad);
             }
             
-            //todo add rectangular cubes to act as lips, figure out best way to leave space for heatest inserts and space around them
+            //todo figure out best way to leave space for heatest inserts and space around them in lip gasket
             //lip
             translate([case_wall_vertical_thickness, case_wall_vertical_thickness, gasket_case_z]){
                 cube([gasket_case_x - case_wall_vertical_thickness*2, gasket_case_y - case_wall_vertical_thickness*2, gasket_lip_height]);
@@ -153,23 +170,30 @@ module gasket_case(){
 }
 //end module gasket_case
 
+
+module button(){
+    cube([button_x, button_y, button_z]);
+}
+//end module button
+
+
 module gasket_screen(){
     //this gaskey is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
     difference(){
         union(){
             //main plane that is squished between case and pcb/screen
-            linear_extrude(gasket_case_z){
+            linear_extrude(gasket_case_z+gasket_screen_visible_z){
                 rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
             }
             
-            //upper level of gasket that is squished against screen
-            translate([0, gasket_screen_pcb_neg_y_offset, gasket_case_z]){
-                cube([pcb_x, pcb_y - gasket_screen_pcb_neg_y_offset*2, gasket_screen_visible_z]);
-            }
+//            //upper level of gasket that is squished against screen
+//            translate([0, gasket_screen_pcb_neg_y_offset, gasket_case_z]){
+//                cube([pcb_x, pcb_y - gasket_screen_pcb_neg_y_offset*2, gasket_screen_visible_z]);
+//            }
             
             
             //big block for buttons 
-            translate([pcb_x/2 - gasket_button_block_x/2, gasket_button_block_neg_y_offset, gasket_case_z]){
+            translate([pcb_x/2 - gasket_button_block_x/2, gasket_button_block_neg_y_offset, 0]){
                 cube([gasket_button_block_x, gasket_button_block_y, gasket_button_block_z]);
             }
         }
@@ -185,33 +209,59 @@ module gasket_screen(){
             
 
         //remove area between buttons todo - maybe not? just have one big button bar?
-        //remove area for buttons themselves todo 
+        //remove area for buttons themselves 
+        //first button, starting on left is D15, then D14, D12, D11
+        button_D15_pcb_edge_neg_x_offset = 12.25; //12.3 measured
+        button_D15_center_pcb_edge_neg_x_offset = 15; //15 caliper estimate
+        button_D14_D15_neg_x_offset = 12.25; //10.35 measured
+        button_D14_center_pcb_edge_neg_x_offset = 32; // caliper estimate
+        button_D12_center_pcb_edge_neg_x_offset = 48; // caliper estimate
+        button_D11_center_pcb_edge_neg_x_offset = 65; // caliper estimate
+        translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2, pcb_button_neg_y_offset, 0]){
+            button();
+        }
+        translate([button_D14_center_pcb_edge_neg_x_offset-button_x/2, pcb_button_neg_y_offset, 0]){
+            button();
+        }
+        translate([button_D12_center_pcb_edge_neg_x_offset-button_x/2, pcb_button_neg_y_offset, 0]){
+            button();
+        }
+        translate([button_D11_center_pcb_edge_neg_x_offset-button_x/2, pcb_button_neg_y_offset, 0]){
+            button();
+        }
+        
+        
+        
+        
+        
+        
+        
         
         //remove area for screws to go through
         //neg x neg y
         translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
             //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
-            cylinder(gasket_case_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
+            cylinder(gasket_case_z+gasket_screen_visible_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
         }
         //pos x neg y
         translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
             //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
-            cylinder(gasket_case_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
+            cylinder(gasket_case_z+gasket_screen_visible_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
         }
         //pos x pos y
         translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
             //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
-            cylinder(gasket_case_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
+            cylinder(gasket_case_z+gasket_screen_visible_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
         }
         //neg x pos y
         translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
             //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
-            cylinder(gasket_case_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
+            cylinder(gasket_case_z+gasket_screen_visible_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
         }
         
         //remove area for lights
         translate([pcb_x/2 - gasket_void_lights_x/2, pcb_y - gasket_void_lights_y, 0]){
-            cube([gasket_void_lights_x, gasket_void_lights_y, gasket_case_z]);
+            cube([gasket_void_lights_x, gasket_void_lights_y, gasket_case_z+gasket_screen_visible_z]);
         }
     }
     
