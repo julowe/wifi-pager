@@ -6,15 +6,26 @@ use <../dotSCAD/src/rounded_square.scad>
 $fn = 9;
 //question - make tpu gasket thick all the way aroudn oter edge of case and make top be even with gasket around screen, then print with gasket away from screen on bed, then have gasket drip down to accomodate screen height?
 
+extrusion_width_tpu_min = 0.5;
+pcb_x = 80;
+pcb_y = 53.5;
+
+standoff_difference_x = 72.5;
+standoff_difference_y = 45.5;
+standoff_diameter = 5.5;
+standoff_pcb_edge_offset = 1;
+
+bolt_diam = 3;
+bolt_diam_tpu = bolt_diam - 0.25;
+
+
 case_inner_x = 90; //this is a little bit of room away from screen ribbon cable and qi rx ribbon cable
 case_inner_y = 64; //first guess 68; //this is a little bit of room away from side of qi rx pad
 case_wall_vertical_thickness = 3;
 case_wall_top_thickness = 2;
 case_rounding_rad = 2;
 
-standoff_difference_x = 72.5;
-standoff_difference_y = 45.5;
-standoff_diameter = 5.5;
+
 
 case_neg_x_to_standoff_edge_distance = 3;
 case_pos_x_to_standoff_edge_distance = 9; //ha wow measurements equal each other (78 outer standoffs + 9 + 3 = 90)
@@ -33,12 +44,13 @@ screen_x_neg_x_bump = 1.5;
 screen_y = 37; //measured 36.8
 screen_z = 1.5; //measured 1.4
 
-screen_x_visible = 67;
+screen_x_visible = 68;
 screen_y_visible = 29;
 screen_z_visible = 20;
-screen_visible_x_inset_from_screen_neg_x_edge = 11;
-screen_visible_y_inset_from_screen_neg_y_edge = 4;
-screen_visible_z_inset_from_case_neg_z_edge = screen_z;
+//screen_visible_void_x_inset_from_screen_neg_x_edge = 11; //from ribbon edge
+screen_visible_void_x_inset_from_screen_neg_x_edge = 9;
+screen_visible_void_y_inset_from_screen_neg_y_edge = 4;
+screen_visible_void_z_inset_from_case_neg_z_edge = screen_z;
 
 
 //gasket info - building this up in Z layers, defining the shape and the voids of each layer
@@ -53,10 +65,25 @@ gasket_screen_void_x = screen_x;
 gasket_screen_void_y = screen_y;
 gasket_screen_void_z = screen_z;
 
+gasket_screen_pcb_neg_y_offset = 6;
+
 
 gasket_screen_visible_x = screen_x+1+1;
 gasket_screen_visible_y = screen_y+1+1;
 gasket_screen_visible_z = gasket_screen_visible_void_z;
+
+
+
+pcb_button_neg_y_offset = 2;
+gasket_button_block_x = 63;
+gasket_button_block_neg_y_offset = pcb_button_neg_y_offset - extrusion_width_tpu_min;
+gasket_button_block_y = gasket_screen_pcb_neg_y_offset - gasket_button_block_neg_y_offset;
+gasket_button_block_z = 5.5;
+
+gasket_void_lights_x = 60;
+gasket_void_lights_y = gasket_screen_pcb_neg_y_offset;
+            
+        
 
 
 gasket_case_x = case_wall_vertical_thickness + case_inner_x + case_wall_vertical_thickness;
@@ -68,11 +95,12 @@ gasket_case_z = 1; //effectively, how thick (z) is the gasket that gets squished
 //gasket_case_void_z = 1;
 
 gasket_lip_width = 2;
+gasket_lip_height = 2;
 gasket_case_void_x = case_inner_x - gasket_lip_width*2;
 gasket_case_void_y = case_inner_y - gasket_lip_width*2;
 gasket_case_void_z = gasket_case_z;
 
-//this is a small lip so the gasket sits nicley in case before screwing two halves otgether
+//this is a small lip so the gasket sits nicley in case before screwing two halves together
 gasket_lip_x = case_inner_x;
 gasket_lip_y = case_inner_y;
 gasket_lip_z = 1;
@@ -87,18 +115,12 @@ heatset_insert_diameter = 5; //todo verify diam size on test print piece
 heatset_insert_height = 5;
 
 
-
-//////difference(){
-////////    roundedcube([gasket_case_x,gasket_case_y,10], false, 2, "z");
-//////    translate([0, 0, gasket_case_z]){
-////////        roundedcube([gasket_case_x,gasket_case_y,10], false, 2, "z");
-//////    }
-//////}
-
+//start rendering things
 
 //gasket_case();
+gasket_screen();
 
-translate([0, 0, gasket_case_z*2]){
+translate([0, 0, gasket_case_z*1]){
 //    case_top();
 }
 
@@ -108,59 +130,94 @@ translate([0, 0, gasket_case_z*2]){
 module gasket_case(){
     //this just goes around the case edge, with a lip insdie to keep it aligned when assembling. doesn't need to touch board or anything else. attached with screws up through bottom shafts, maybe through tpu, into heatset inserts set in top of case.
     difference(){
-        //main plane that is squished between case halves
-        linear_extrude(gasket_case_z){
-            rounded_square(size = [gasket_case_x, gasket_case_y], corner_r = case_rounding_rad);
+        union(){
+            //main plane that is squished between case halves
+            linear_extrude(gasket_case_z){
+                rounded_square(size = [gasket_case_x, gasket_case_y], corner_r = case_rounding_rad);
+            }
+            
+            //todo add rectangular cubes to act as lips, figure out best way to leave space for heatest inserts and space around them
+            //lip
+            translate([case_wall_vertical_thickness, case_wall_vertical_thickness, gasket_case_z]){
+                cube([gasket_case_x - case_wall_vertical_thickness*2, gasket_case_y - case_wall_vertical_thickness*2, gasket_lip_height]);
+            }
         }
-        //todo figuyre out void for board etc 
-        //todo add rectangular cubes to act as lips, figure out best way to leave space for heatest inserts and space around them
+       //void
+        translate([case_wall_vertical_thickness+gasket_lip_width, case_wall_vertical_thickness+gasket_lip_width, 0]){
+            cube([gasket_case_x - (case_wall_vertical_thickness + gasket_lip_width)*2, gasket_case_y - (case_wall_vertical_thickness + gasket_lip_width)*2, gasket_case_z +gasket_lip_height]);
+        }
+        
+        //TODO remove area for heatset inserts and material around them
         
     }
-
-//
-//OLD
-//
-    
-//    difference(){
-//        union(){
-//            //todo make rounded
-//            cube([gasket_case_x, gasket_case_y, gasket_case_z]);
-//            translate([case_wall_vertical_thickness, case_wall_vertical_thickness, gasket_case_z]){
-//                color("aqua"){
-//                cube([gasket_lip_x, gasket_lip_y, gasket_lip_z]);
-//                }
-//            }
-//        }
-//        
-//        translate([case_wall_vertical_thickness+gasket_lip_width, case_wall_vertical_thickness+gasket_lip_width, 0]){
-//            cube([gasket_case_void_x, gasket_case_void_y, gasket_case_void_z]);
-//        }
-//        
-//        translate([case_wall_vertical_thickness+gasket_lip_width, case_wall_vertical_thickness+gasket_lip_width, gasket_case_z]){
-//            cube([gasket_lip_void_x, gasket_lip_void_y, gasket_lip_void_z]);
-//        }
-//        
-//    }
 }
-
+//end module gasket_case
 
 module gasket_screen(){
     //this gaskey is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
     difference(){
         union(){
-            //make main plane, just as shape of PCB
+            //main plane that is squished between case and pcb/screen
+            linear_extrude(gasket_case_z){
+                rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
+            }
+            
             //upper level of gasket that is squished against screen
-            //big block for buttons
+            translate([0, gasket_screen_pcb_neg_y_offset, gasket_case_z]){
+                cube([pcb_x, pcb_y - gasket_screen_pcb_neg_y_offset*2, gasket_screen_visible_z]);
+            }
+            
+            
+            //big block for buttons 
+            translate([pcb_x/2 - gasket_button_block_x/2, gasket_button_block_neg_y_offset, gasket_case_z]){
+                cube([gasket_button_block_x, gasket_button_block_y, gasket_button_block_z]);
+            }
         }
         //remove area for screen itself
-        //remove area to make screen visible
-        //remove area between buttons
-        //remove area for buttons themselves
-        //remove area for screws to go through
-        //remove area for lights
-    }
-}
+        translate([pcb_x/2 - gasket_screen_void_x/2, pcb_y/2 - gasket_screen_void_y/2, 0]){
+            cube([gasket_screen_void_x, gasket_screen_void_y, gasket_screen_void_z]);
 
+        }
+        //remove area to make screen visible
+        translate([pcb_x/2 - gasket_screen_void_x/2 + screen_visible_void_x_inset_from_screen_neg_x_edge, pcb_y/2 - gasket_screen_void_y/2 + screen_visible_void_y_inset_from_screen_neg_y_edge, gasket_case_z]){
+            cube([gasket_screen_visible_void_x, gasket_screen_visible_void_y, gasket_screen_visible_void_z]);
+        }
+            
+
+        //remove area between buttons todo - maybe not? just have one big button bar?
+        //remove area for buttons themselves todo 
+        
+        //remove area for screws to go through
+        //neg x neg y
+        translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
+            //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
+            cylinder(gasket_case_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        }
+        //pos x neg y
+        translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
+            //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
+            cylinder(gasket_case_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        }
+        //pos x pos y
+        translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
+            //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
+            cylinder(gasket_case_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        }
+        //neg x pos y
+        translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
+            //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
+            cylinder(gasket_case_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        }
+        
+        //remove area for lights
+        translate([pcb_x/2 - gasket_void_lights_x/2, pcb_y - gasket_void_lights_y, 0]){
+            cube([gasket_void_lights_x, gasket_void_lights_y, gasket_case_z]);
+        }
+    }
+    
+
+}
+//end module gasket_screen
 
 
 module case_top() {
@@ -219,15 +276,20 @@ translate([0, 0, 0]){
     }
 }
 }
+//end module case_top
 
 
 
 
 
+//need below? delete?
 
-
-
-
+//////difference(){
+////////    roundedcube([gasket_case_x,gasket_case_y,10], false, 2, "z");
+//////    translate([0, 0, gasket_case_z]){
+////////        roundedcube([gasket_case_x,gasket_case_y,10], false, 2, "z");
+//////    }
+//////}
 
 
 
