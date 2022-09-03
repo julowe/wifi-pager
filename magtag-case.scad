@@ -208,7 +208,7 @@ module gasket_screen(){
         }
             
 
-        //remove area between buttons todo - maybe not? just have one big button bar?
+        
         //remove area for buttons themselves 
         //first button, starting on left is D15, then D14, D12, D11
         button_D15_pcb_edge_neg_x_offset = 12.25; //12.3 measured
@@ -217,6 +217,8 @@ module gasket_screen(){
         button_D14_center_pcb_edge_neg_x_offset = 32; // caliper estimate
         button_D12_center_pcb_edge_neg_x_offset = 48; // caliper estimate
         button_D11_center_pcb_edge_neg_x_offset = 65; // caliper estimate
+        
+        
         translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2, pcb_button_neg_y_offset, 0]){
             button();
         }
@@ -228,6 +230,21 @@ module gasket_screen(){
         }
         translate([button_D11_center_pcb_edge_neg_x_offset-button_x/2, pcb_button_neg_y_offset, 0]){
             button();
+        }
+        
+        //remove area between buttons todo - maybe not? just have one big button bar?
+        //about 10.3 between buttons. so say 10
+        button_button_x_offset = 10;
+        button_button_void_x = button_button_x_offset - extrusion_width_tpu_min*2*3;
+        
+        translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+            cube([button_button_void_x, gasket_button_block_y, 15]);
+        }
+        translate([(button_D14_center_pcb_edge_neg_x_offset+button_D12_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+            cube([button_button_void_x, gasket_button_block_y, 15]);
+        }
+        translate([(button_D12_center_pcb_edge_neg_x_offset+button_D11_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+            cube([button_button_void_x, gasket_button_block_y, 15]);
         }
         
         
