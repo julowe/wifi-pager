@@ -158,6 +158,15 @@ gasket_lip_void_y = gasket_case_void_y;
 gasket_lip_void_z = gasket_case_void_z;
 
 
+
+
+case_button_gap = 0.5;
+case_button_void_x = gasket_button_block_x + case_button_gap*2;
+case_button_void_y = gasket_button_block_y + case_button_gap*2;
+            
+            
+
+
 heatset_insert_diameter = 5.2;
 heatset_insert_height = 5;
 
@@ -258,7 +267,7 @@ module gasket_screen(){
 //end module gasket_screen
 
 
-
+//ugh ok didn't code additions in useful way, but leaving for now. 20220903
 module pcb_top_voids(x_addition, y_addition, z_addition, z_exaggegerate){
     //z_addition not used, maybe for lights but think already enough void in definition
     //remove area for screen itself
@@ -354,7 +363,7 @@ module case_top_v2() {
             cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_rounding_rad*2]);
         }
         
-        
+        //move all contained so their coordinate system is as if pcb at 0,0
         translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_neg_y), 0]){
             //build part that interfaces with gasket
 //            cube([pcb_x,pcb_y,10]);
@@ -381,8 +390,38 @@ module case_top_v2() {
             translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), case_thickness_under_bolt_head]){
                 cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
             }
+            
+            //remove big block for buttons 
+            translate([pcb_x/2 - case_button_void_x/2, gasket_button_block_neg_y_offset-case_button_gap, 0]){
+                cube([case_button_void_x, case_button_void_y, z_exaggeration]);
+            }
+        
+        
+        } //end translate coord system
+    } //end diff
+    
+    
+    case_button_gap = 0.5;
+case_button_void_x = gasket_button_block_x + case_button_gap*2;
+case_button_void_y = gasket_button_block_y + case_button_gap*2;
+    
+    
+    
+    //todo do this directly with button positions and rounded cubes if i go that way
+    //move all contained so their coordinate system is as if pcb at 0,0
+    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_neg_y), 0]){
+        //add area between buttons
+        translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2+case_button_gap, gasket_button_block_neg_y_offset-case_button_gap, 0]){
+            cube([button_button_void_x-case_button_gap*2, case_button_void_y, case_thickness_under_bolt_head+bolt_head_height]);
         }
-    }
+        translate([(button_D14_center_pcb_edge_neg_x_offset+button_D12_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2+case_button_gap, gasket_button_block_neg_y_offset-case_button_gap, 0]){
+            cube([button_button_void_x-case_button_gap*2, case_button_void_y, case_thickness_under_bolt_head+bolt_head_height]);
+        }
+        translate([(button_D12_center_pcb_edge_neg_x_offset+button_D11_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2+case_button_gap, gasket_button_block_neg_y_offset-case_button_gap, 0]){
+            cube([button_button_void_x-case_button_gap*2, case_button_void_y, case_thickness_under_bolt_head+bolt_head_height]);
+        }
+    }//end translate
+        
 }
 //end module case_top_v2
         
