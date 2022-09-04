@@ -4,10 +4,11 @@
 use <../dotSCAD/src/rounded_cube.scad>;
 use <../dotSCAD/src/rounded_square.scad>
 
-$fn = 16;
+$fn = 15;
 //question - make tpu gasket thick all the way aroudn oter edge of case and make top be even with gasket around screen, then print with gasket away from screen on bed, then have gasket drip down to accomodate screen height?
 
 extrusion_width_tpu_min = 0.5;
+extrusion_height_tpu_min = 0.2;
 pcb_x = 80;
 pcb_y = 53.5;
 
@@ -113,15 +114,9 @@ gasket_button_block_neg_y_offset = pcb_button_neg_y_offset - extrusion_width_tpu
 gasket_button_block_y = button_y + extrusion_width_tpu_min*2;
 
 
-//button_D15_center_pcb_edge_neg_x_offset-button_x/2
-
-
-
 
 //gasket_button_block_z = 5.5;
 gasket_button_block_z = button_z + 0.6; //idea: 2 or 3 layers, todo put in layer height variable
-
-
 
 
 //about 10.3 between buttons. so say 10
@@ -133,8 +128,6 @@ gasket_void_lights_y = gasket_screen_pcb_neg_y_offset;
 gasket_void_lights_z = 3; //measured at 1.9-2.1
             
         
-
-
 gasket_case_x = case_wall_vertical_thickness + case_inner_x + case_wall_vertical_thickness;
 gasket_case_y = case_wall_vertical_thickness + case_inner_y + case_wall_vertical_thickness;
 gasket_case_z = 1; //effectively, how thick (z) is the gasket that gets squished betwen case shell halves
@@ -159,12 +152,10 @@ gasket_lip_void_z = gasket_case_void_z;
 
 
 
-
 case_button_gap = 0.5;
 case_button_void_x = gasket_button_block_x + case_button_gap*2;
 case_button_void_y = gasket_button_block_y + case_button_gap*2;
-            
-            
+                  
 
 
 heatset_insert_diameter = 5.2;
@@ -194,8 +185,24 @@ translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thic
     case_top_v2();
 }
 
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15/2, 15, 0]){
+    for (i = [0:3]) {
+        translate([0,i*bolt_head_diam+(i+1)*5,0]){
+            gasket_bolt_head();
+        }
+    }
+}
+
 case_bottom();
 
+
+module gasket_bolt_head(){
+    difference(){
+        cylinder(extrusion_height_tpu_min*2, (bolt_head_diam-0.5)/2, (bolt_head_diam-0.5)/2);
+        cylinder(extrusion_height_tpu_min*2, bolt_diam_tpu/2, bolt_diam_tpu/2);
+    }
+}
+//end module gasket_bolt_head
 
 module gasket_case(){
     //this just goes around the case edge, with a lip insdie to keep it aligned when assembling. doesn't need to touch board or anything else. attached with screws up through bottom shafts, maybe through tpu, into heatset inserts set in top of case.
@@ -407,7 +414,7 @@ case_button_void_y = gasket_button_block_y + case_button_gap*2;
     
     
     
-    //todo do this directly with button positions and rounded cubes if i go that way
+    //todo do this directly with button positions and rounded cubes if i go that way, but then also place tpu buttons directly, not a long block with chunks taken out.
     //move all contained so their coordinate system is as if pcb at 0,0
     translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_neg_y), 0]){
         //add area between buttons
