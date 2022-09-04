@@ -36,7 +36,8 @@ bolt_head_height = 4; //make greater to have bolt head recessed, todo measure ac
 
 case_inner_x = 90; //this is a little bit of room away from screen ribbon cable and qi rx ribbon cable
 case_inner_y = 64; //first guess 68; //this is a little bit of room away from side of qi rx pad
-case_wall_vertical_thickness = 3;
+case_bottom_void_z = 10;
+case_wall_vertical_thickness = 3; //ugh really this shoudl be 'case_vertical_wall_thickness'
 case_wall_top_thickness = 2;
 case_wall_bottom_thickness = 4;
 case_rounding_rad = 2;
@@ -142,25 +143,28 @@ gasket_case_z = 1; //effectively, how thick (z) is the gasket that gets squished
 //gasket_case_void_y = 54;
 //gasket_case_void_z = 1;
 
+//this is a small lip so the gasket sits nicley in case before screwing two halves together
+//gasket_lip_x = case_inner_x;
+//gasket_lip_y = case_inner_y;
 gasket_lip_width = 2;
-gasket_lip_height = 2;
+gasket_lip_height = 3;
 gasket_case_void_x = case_inner_x - gasket_lip_width*2;
 gasket_case_void_y = case_inner_y - gasket_lip_width*2;
 gasket_case_void_z = gasket_case_z;
 
-//this is a small lip so the gasket sits nicley in case before screwing two halves together
-gasket_lip_x = case_inner_x;
-gasket_lip_y = case_inner_y;
-gasket_lip_z = 1;
 
 gasket_lip_void_x = gasket_case_void_x;
 gasket_lip_void_y = gasket_case_void_y;
 gasket_lip_void_z = gasket_case_void_z;
 
 
-
 heatset_insert_diameter = 5.2;
 heatset_insert_height = 5;
+
+
+bolt_head_material_under_bottom_case_z = case_bottom_void_z + case_wall_bottom_thickness - bolt_head_height - standoff_height - 1; //qmm clearance between standoff and this cylinder, so can squish gasket
+echo("There is ", bolt_head_material_under_bottom_case_z, " mm material under the bolt on bottom of casem plus 1mm of air to standoff");
+bolt_head_material_around_diam = bolt_head_diam + 2*2;
 
 
 //
@@ -169,23 +173,19 @@ heatset_insert_height = 5;
 //
 //
 
-//gasket_case();
-//translate([6, 10, 0]){
-//    gasket_screen();
-//}
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
+    gasket_case();
+}
 
-//button();
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
+    gasket_screen();
+}
 
-translate([0, 0, (gasket_case_z+gasket_screen_visible_z)*0]){
-//    case_top_v2();
+translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
+    case_top_v2();
 }
 
 case_bottom();
-
-//remove from case
-translate([0, 0, -(gasket_case_z+gasket_screen_visible_z)]){
-//    pcb_top_voids(0,0,0,true);
-}
 
 
 module gasket_case(){
@@ -197,20 +197,23 @@ module gasket_case(){
                 rounded_square(size = [gasket_case_x, gasket_case_y], corner_r = case_rounding_rad);
             }
             
-            //todo figure out best way to leave space for heatest inserts and space around them in lip gasket
             //lip
             translate([case_wall_vertical_thickness, case_wall_vertical_thickness, gasket_case_z]){
-                cube([gasket_case_x - case_wall_vertical_thickness*2, gasket_case_y - case_wall_vertical_thickness*2, gasket_lip_height]);
+                linear_extrude(gasket_lip_height){
+                    rounded_square(size = [gasket_case_x - case_wall_vertical_thickness*2, gasket_case_y - case_wall_vertical_thickness*2], corner_r = case_rounding_rad);
+                }
+//                cube([gasket_case_x - case_wall_vertical_thickness*2, gasket_case_y - case_wall_vertical_thickness*2, gasket_lip_height]);
             }
-        }
+        } //end union
+        
        //void
         translate([case_wall_vertical_thickness+gasket_lip_width, case_wall_vertical_thickness+gasket_lip_width, 0]){
-            cube([gasket_case_x - (case_wall_vertical_thickness + gasket_lip_width)*2, gasket_case_y - (case_wall_vertical_thickness + gasket_lip_width)*2, gasket_case_z +gasket_lip_height]);
+            linear_extrude(gasket_case_z +gasket_lip_height){
+                rounded_square(size = [gasket_case_x - (case_wall_vertical_thickness + gasket_lip_width)*2, gasket_case_y - (case_wall_vertical_thickness + gasket_lip_width)*2], corner_r = case_rounding_rad);
+            }
+//            cube([gasket_case_x - (case_wall_vertical_thickness + gasket_lip_width)*2, gasket_case_y - (case_wall_vertical_thickness + gasket_lip_width)*2, gasket_case_z +gasket_lip_height]);
         }
-        
-        //TODO remove area for heatset inserts and material around them
-        
-    }
+    }//end diff
 }
 //end module gasket_case
 
@@ -223,7 +226,7 @@ module button(module_button_x, module_button_y, module_button_z){
 
 
 module gasket_screen(){
-    //this gaskey is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
+    //this gasket is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
     difference(){
         union(){
             //main plane that is squished between case and pcb/screen
@@ -237,10 +240,9 @@ module gasket_screen(){
             }
         }
         
+        //remove stuff from top of pcb
         pcb_top_voids(0,0,0,false);
-        
-        
-        
+
         //remove area between buttons
         translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
             cube([button_button_void_x, gasket_button_block_y, 15]);
@@ -252,8 +254,6 @@ module gasket_screen(){
             cube([button_button_void_x, gasket_button_block_y, 15]);
         }
     }
-    
-
 }
 //end module gasket_screen
 
@@ -334,16 +334,6 @@ module pcb_top_voids(x_addition, y_addition, z_addition, z_exaggegerate){
 //end module pcb_top_voids
 
 
-
-
-
-
-
-
-
-
-
-
 //case version where bolts come down through the top and screw into standoffs to squish screen gasket against screen/pcb. also has heast set inserts outside that gasket that receive the bolts that com eup through the case bottom to squish two halves together around case gasket
 module case_top_v2() {
     
@@ -392,65 +382,32 @@ module case_top_v2() {
                 cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
             }
         }
-        
-//        //remove area between buttons
-//        translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-//            cube([button_button_void_x, gasket_button_block_y, 15]);
-//        }
-//        translate([(button_D14_center_pcb_edge_neg_x_offset+button_D12_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-//            cube([button_button_void_x, gasket_button_block_y, 15]);
-//        }
-//        translate([(button_D12_center_pcb_edge_neg_x_offset+button_D11_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-//            cube([button_button_void_x, gasket_button_block_y, 15]);
-//        }
-    }
-    
-    translate([0, 0, 0]){
-        difference(){
-        }
     }
 }
 //end module case_top_v2
         
 
 module case_bottom() {
-    case_bottom_void_z = 10;
-    //todo make void for on/off switch, not through entire case, just enough to fit it
+    //todo make void for on/off switch, not through entire case, just enough to fit it - should be enough here iwth pcb offset, but check
     difference(){
-    //make rounded case
         union(){
             difference(){
+                //make rounded cube for outer case
                 rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_bottom_void_z + case_wall_bottom_thickness + (case_rounding_rad*2)],case_rounding_rad);
-                    
-                    
-                
             
-                //remove fake bottom half of rounded case
+                //remove fake top half of rounded case, so we have a smooth top plane of case
                 translate([0,0,case_bottom_void_z + case_wall_bottom_thickness]){
                     cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_rounding_rad*2]);
                 }
                 
-                //remove rounded inner void todo
+                //remove rounded inner void
                 translate([case_wall_vertical_thickness, case_wall_vertical_thickness, case_wall_bottom_thickness]){
                     rounded_cube([case_inner_x, case_inner_y, 10 + (case_rounding_rad*2)],case_rounding_rad);
                 }
             } //end diff
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+
             //add plastic cylinders to hold bolt against case bottom
-            bolt_head_material_under_bottom_case_z = case_bottom_void_z + case_wall_bottom_thickness - bolt_head_height - standoff_height - 1; //qmm clearance between standoff and this cylinder, so can squish gasket
-            echo("There is ", bolt_head_material_under_bottom_case_z, " mm material under the bolt on bottom of case");
-            bolt_head_material_around_diam = bolt_head_diam + 2*2;
             translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_neg_y), 0]){
                 //neg x neg y
                 translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, case_wall_bottom_thickness + 0]){
@@ -523,7 +480,7 @@ module case_top_v1() {
 translate([0, 0, 0]){
     difference(){
         //main outer body
-        //todo round corner, cylinder then sphere, or mink, or copy in a rounded cube module?
+        //obsolete to do: round corner, cylinder then sphere, or mink, or copy in a rounded cube module?
         cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness,10]);
         
         //remove void for board etc
@@ -580,71 +537,3 @@ translate([0, 0, 0]){
 
 
 
-
-//need below? delete?
-
-//////difference(){
-////////    roundedcube([gasket_case_x,gasket_case_y,10], false, 2, "z");
-//////    translate([0, 0, gasket_case_z]){
-////////        roundedcube([gasket_case_x,gasket_case_y,10], false, 2, "z");
-//////    }
-//////}
-
-
-
-// More information: https://danielupshaw.com/openscad-rounded-corners/
-
-// Set to 0.01 for higher definition curves (renders slower)
-$fs = 0.15;
-
-module roundedcube(size = [1, 1, 1], center = false, radius = 0.5, apply_to = "all") {
-	// If single value, convert to [x, y, z] vector
-	size = (size[0] == undef) ? [size, size, size] : size;
-
-	translate_min = radius;
-	translate_xmax = size[0] - radius;
-	translate_ymax = size[1] - radius;
-	translate_zmax = size[2] - radius;
-
-	diameter = radius * 2;
-
-	obj_translate = (center == false) ?
-		[0, 0, 0] : [
-			-(size[0] / 2),
-			-(size[1] / 2),
-			-(size[2] / 2)
-		];
-
-	translate(v = obj_translate) {
-		hull() {
-			for (translate_x = [translate_min, translate_xmax]) {
-				x_at = (translate_x == translate_min) ? "min" : "max";
-				for (translate_y = [translate_min, translate_ymax]) {
-					y_at = (translate_y == translate_min) ? "min" : "max";
-					for (translate_z = [translate_min, translate_zmax]) {
-						z_at = (translate_z == translate_min) ? "min" : "max";
-
-						translate(v = [translate_x, translate_y, translate_z])
-						if (
-							(apply_to == "all") ||
-							(apply_to == "xmin" && x_at == "min") || (apply_to == "xmax" && x_at == "max") ||
-							(apply_to == "ymin" && y_at == "min") || (apply_to == "ymax" && y_at == "max") ||
-							(apply_to == "zmin" && z_at == "min") || (apply_to == "zmax" && z_at == "max")
-						) {
-							sphere(r = radius);
-						} else {
-							rotate = 
-								(apply_to == "xmin" || apply_to == "xmax" || apply_to == "x") ? [0, 90, 0] : (
-								(apply_to == "ymin" || apply_to == "ymax" || apply_to == "y") ? [90, 90, 0] :
-								[0, 0, 0]
-							);
-							rotate(a = rotate)
-							cylinder(h = diameter, r = radius, center = true);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-    
