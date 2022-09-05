@@ -7,6 +7,17 @@ use <../dotSCAD/src/rounded_square.scad>
 $fn = 15;
 //question - make tpu gasket thick all the way aroudn oter edge of case and make top be even with gasket around screen, then print with gasket away from screen on bed, then have gasket drip down to accomodate screen height?
 
+
+//todo update above description of how pieces are printed and go together
+//MUST todo make case bottom big enough to hold standoffs, pcb and ?
+//todo might not be needed, but: make gasket lip less wide on pos y edge. or just move bolt holes down (-1mm Y) and reprint top and bottom case. and move bolt holes +1mm x
+//MUST slice screen gasket into two layers, the lower pla bolsters (top and bottom piece seperate), and the top tpu gasket and buttons etc.
+//MUST todo make z void for buttons taller so squishing down top case doesnt permenantly depress the buttons :-(
+//todo might not be needed, but: maybe make case 1-3mm wider, and then reprint case gasket too (it is very bumpy anyway)
+//todo might not be needed, but: make rounding radius 4 for nicer case look, then i have to reprint everything except screen gasket, but that needs fixing anyway soooo
+//todo make power button notch in case gasket
+//todo make buttons have thinner walls, so they compress easier?
+
 extrusion_width_tpu_min = 0.5;
 extrusion_height_tpu_min = 0.2;
 pcb_x = 80;
