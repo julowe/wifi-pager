@@ -56,7 +56,7 @@ bolt_head_height = 3.25; //make greater to have bolt head recessed, measured at 
 
 
 case_inner_x = 92; //this is a little bit of room away from screen ribbon cable and qi rx ribbon cable
-case_inner_y = 65; //first guess 68; //this is a little bit of room away from side of qi rx pad
+case_inner_y = 60+2; //first guess 68; //this is a little bit of room away from side of qi rx pad // 60 is actually wide enough, but looks off balance, so adding a little back jsut for top of case aesthetics
 case_bottom_void_z = 10;
 case_wall_vertical_thickness = 3; //ugh really this shoudl be 'case_vertical_wall_thickness'
 case_wall_top_thickness = 2;
