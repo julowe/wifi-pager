@@ -27,7 +27,8 @@ from adafruit_magtag.magtag import MagTag
 magtag = MagTag()
 
 # magtag.set_background("bmps/oshwa_full.bmp")
-magtag.set_background("bmps/cpu-sun.bmp")
+#magtag.set_background("bmps/cpu-sun.bmp")
+magtag.set_background("bmps/jkl-initials.bmp")
 
 # # Set up WiFi
 # wifi.radio.connect(secrets["ssid"], secrets["password"])
@@ -163,7 +164,7 @@ def wrap(text, max_width, max_lines, font):
 
 magtag.add_text(
     text_font="fonts/Arial-Bold-12.bdf",
-    text_position=(5, 0),
+    text_position=(8, 6),
     text_scale=1,
     line_spacing=0.7,
     text_anchor_point=(0, 0),
@@ -178,7 +179,7 @@ magtag.add_text(
 
 magtag.add_text(
     text_font="fonts/ArialMT-9.bdf",
-    text_position=(5, 80),
+    text_position=(8, 90),
     text_scale=1,
     line_spacing=0.6,
     text_anchor_point=(0, 0),
@@ -186,8 +187,9 @@ magtag.add_text(
 
 # Create the QR code
 # url = f"https://certification.oshwa.org/{selected['oshwaUid'].lower()}.html"
-url = "https://venmo.com/code?user_id=1777124390207488863&created=1654029427.873137"
-magtag.graphics.qrcode(url, qr_size=4, x=160, y=-6)
+#url = "https://venmo.com/code?user_id=1777124390207488863&created=1654029427.873137"
+url = "https://jklideas.com/magtag-case-wifi-pager/"
+magtag.graphics.qrcode(url, qr_size=4, x=168, y=2)
 
 # Prepare to wrap the text correctly by getting the width of each character for every font
 arial_12 = font_width_to_dict("fonts/Arial-Bold-12.bdf")
@@ -216,8 +218,9 @@ arial_9 = font_width_to_dict("fonts/ArialMT-9.bdf")
 
 # Set the text. On some characters, this fails. If so, run the whole file again in 5 seconds
 try:
-    magtag.set_text("Don't Forget \nTo Tip Your \nBartender", 0, False)
-    magtag.set_text("Otherwise they might just not tell \nyou if you're walking in to \na death trap", 1)
+    #magtag.set_text("Don't Forget \nTo Tip Your \nBartender", 0, False)
+    magtag.set_text("MagTag Case & \nWifi Pager", 0, False)
+    magtag.set_text("By Justin Lowe - jklideas.com", 1)
     # magtag.exit_and_deep_sleep(3600)
 except Exception:  # pylint: disable=broad-except
     print("Could not set title or description: unsupported glyphs.")
