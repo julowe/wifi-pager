@@ -210,12 +210,16 @@ gasket_individual_button_rounding_rad = 1;
 gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + gasket_individual_button_rounding_rad; //last term is how tall above case to make button stick out (suggest it be equal to or greater than rounding rad, otherwise button will besmaller than hole at top of case). if you change this term also need to make sure term in button_sheath module doesn't screw up the join of sheath to gasket
             
             
+            
+            
 
-//
-//
-//start rendering things
-//
-//
+/*************************************
+//                                  //
+//                                  //
+//  start rendering things          //
+//                                  //
+//                                  //
+*************************************/
 
 //translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
 //    gasket_case();
@@ -247,6 +251,16 @@ gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + g
 //}
 //
 //case_bottom();
+
+
+
+/*************************************
+//                                  //
+//                                  //
+//      start modules               //
+//                                  //
+//                                  //
+*************************************/
 
 
 module gasket_bolt_head(){
@@ -311,106 +325,6 @@ module button_sheath(wall_thickness_x, wall_thickness_y, height, button_rounding
 }
 //end module button
 
-//button_x+gasket_individual_button_wall_x*2
-module gasket_screen(){
-    //this gasket is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
-    difference(){
-        union(){
-            //main plane that is squished between case and pcb/screen
-            linear_extrude(gasket_case_z+gasket_screen_visible_z){
-                rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
-            }
-            
-            //big block for buttons 
-            translate([pcb_x/2 - gasket_button_block_x/2, gasket_button_block_neg_y_offset, 0]){
-                cube([gasket_button_block_x, gasket_button_block_y, gasket_button_block_z]);
-            }
-        }
-        
-        //remove stuff from top of pcb
-        pcb_top_voids(0,0,0,false);
-
-        //remove area between buttons
-        translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-            cube([button_button_void_x, gasket_button_block_y, 15]);
-        }
-        translate([(button_D14_center_pcb_edge_neg_x_offset+button_D12_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-            cube([button_button_void_x, gasket_button_block_y, 15]);
-        }
-        translate([(button_D12_center_pcb_edge_neg_x_offset+button_D11_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-            cube([button_button_void_x, gasket_button_block_y, 15]);
-        }
-    }
-}
-//end module gasket_screen
-
-
-module gasket_screen_v2(){
-    //this gasket is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
-    difference(){
-        union(){
-            //main plane that is squished between case and pcb/screen
-            linear_extrude(gasket_case_z+gasket_screen_visible_z){
-                rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
-            }
-            
-//            //big block for buttons 
-//            translate([pcb_x/2 - gasket_button_block_x/2, gasket_button_block_neg_y_offset, 0]){
-//                cube([gasket_button_block_x, gasket_button_block_y, gasket_button_block_z]);
-//            }
-            
-            
-            
-            
-            
-            
-            //add area around buttons themselves
-            echo("Button is Xmm above gasket: ", button_z+gasket_individual_button_wall_z - (gasket_case_z+gasket_screen_visible_z));
-            translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, 0]){
-                button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, button_z+gasket_individual_button_wall_z);
-            }
-            translate([button_D14_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, 0]){
-                button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, button_z+gasket_individual_button_wall_z);
-            }
-            translate([button_D12_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, 0]){
-                button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, button_z+gasket_individual_button_wall_z);
-            }
-            translate([button_D11_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, 0]){
-                button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, button_z+gasket_individual_button_wall_z);
-            }
-        }
-        
-        //remove stuff from top of pcb
-        pcb_top_voids(0,0,0,false);
-
-//        //remove area between buttons
-//        translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-//            cube([button_button_void_x, gasket_button_block_y, 15]);
-//        }
-//        translate([(button_D14_center_pcb_edge_neg_x_offset+button_D12_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-//            cube([button_button_void_x, gasket_button_block_y, 15]);
-//        }
-//        translate([(button_D12_center_pcb_edge_neg_x_offset+button_D11_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
-//            cube([button_button_void_x, gasket_button_block_y, 15]);
-//        }
-    }
-}
-//end module gasket_screen_v2
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 module gasket_screen_v3(object){
     //this gasket is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
@@ -461,25 +375,6 @@ module gasket_screen_v3(object){
     } //end if else
 }
 //end module gasket_screen_v3
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -764,6 +659,17 @@ module case_bottom() {
     
 }
 //end module case_bottom
+ 
+
+
+/*************************************
+//                                  //
+//                                  //
+//        old modules               //
+//                                  //
+//                                  //
+*************************************/
+
 
 //this is the case top where heat set inserts woudl be in the top and screws come up from the bottom through the standoff threads and into the heatset inserts.
 module case_top_v1() {
@@ -824,6 +730,92 @@ translate([0, 0, 0]){
 }
 //end module case_top
 
+
+
+module gasket_screen(){
+    //this gasket is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
+    difference(){
+        union(){
+            //main plane that is squished between case and pcb/screen
+            linear_extrude(gasket_case_z+gasket_screen_visible_z){
+                rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
+            }
+            
+            //big block for buttons 
+            translate([pcb_x/2 - gasket_button_block_x/2, gasket_button_block_neg_y_offset, 0]){
+                cube([gasket_button_block_x, gasket_button_block_y, gasket_button_block_z]);
+            }
+        }
+        
+        //remove stuff from top of pcb
+        pcb_top_voids(0,0,0,false);
+
+        //remove area between buttons
+        translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+            cube([button_button_void_x, gasket_button_block_y, 15]);
+        }
+        translate([(button_D14_center_pcb_edge_neg_x_offset+button_D12_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+            cube([button_button_void_x, gasket_button_block_y, 15]);
+        }
+        translate([(button_D12_center_pcb_edge_neg_x_offset+button_D11_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+            cube([button_button_void_x, gasket_button_block_y, 15]);
+        }
+    }
+}
+//end module gasket_screen
+
+
+module gasket_screen_v2(){
+    //this gasket is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
+    difference(){
+        union(){
+            //main plane that is squished between case and pcb/screen
+            linear_extrude(gasket_case_z+gasket_screen_visible_z){
+                rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
+            }
+            
+//            //big block for buttons 
+//            translate([pcb_x/2 - gasket_button_block_x/2, gasket_button_block_neg_y_offset, 0]){
+//                cube([gasket_button_block_x, gasket_button_block_y, gasket_button_block_z]);
+//            }
+            
+            
+            
+            
+            
+            
+            //add area around buttons themselves
+            echo("Button is Xmm above gasket: ", button_z+gasket_individual_button_wall_z - (gasket_case_z+gasket_screen_visible_z));
+            translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, 0]){
+                button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, button_z+gasket_individual_button_wall_z);
+            }
+            translate([button_D14_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, 0]){
+                button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, button_z+gasket_individual_button_wall_z);
+            }
+            translate([button_D12_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, 0]){
+                button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, button_z+gasket_individual_button_wall_z);
+            }
+            translate([button_D11_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, 0]){
+                button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, button_z+gasket_individual_button_wall_z);
+            }
+        }
+        
+        //remove stuff from top of pcb
+        pcb_top_voids(0,0,0,false);
+
+//        //remove area between buttons
+//        translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+//            cube([button_button_void_x, gasket_button_block_y, 15]);
+//        }
+//        translate([(button_D14_center_pcb_edge_neg_x_offset+button_D12_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+//            cube([button_button_void_x, gasket_button_block_y, 15]);
+//        }
+//        translate([(button_D12_center_pcb_edge_neg_x_offset+button_D11_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2, gasket_button_block_neg_y_offset, gasket_case_z+gasket_screen_visible_z]){
+//            cube([button_button_void_x, gasket_button_block_y, 15]);
+//        }
+    }
+}
+//end module gasket_screen_v2
 
 
 
