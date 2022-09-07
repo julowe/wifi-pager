@@ -17,6 +17,7 @@ $fn = 15;
 //todo might not be needed, but: make rounding radius 4 for nicer case look, then i have to reprint everything except screen gasket, but that needs fixing anyway soooo
 //todo make power button notch in case gasket
 //todo make buttons have thinner walls, so they compress easier?
+//todo make clear plastic sylinder with cutout to snug against LEDs - to better transmit light upwards?
 
 extrusion_width_tpu_min = 0.5;
 extrusion_height_tpu_min = 0.2;
@@ -35,7 +36,7 @@ standoff_pcb_edge_offset = 1;
 
 button_x = 6.5; //6.1 measured
 button_y = 4; //3.62 measured
-button_z = 4.5; //4.36 measured
+button_z = 5.5; //4.36 measured, but need to account for sagging tpu. 4.5 was note enough, gap between tpu gasket and pcb measured at 1.1 mm
 
 
 light_x = 4;
@@ -200,8 +201,10 @@ echo("There is ", bolt_head_material_under_bottom_case_z, " mm material under th
 bolt_head_material_around_diam = bolt_head_diam + 2*2;
 
 
-gasket_individual_button_wall_z = (case_thickness_under_bolt_head+bolt_head_height) - (button_z - (gasket_case_z+gasket_screen_visible_z)) + 1;
+gasket_individual_button_wall_z = (case_thickness_under_bolt_head+bolt_head_height) - (button_z - (screen_z+gasket_screen_visible_z)) + 1;
             echo(gasket_individual_button_wall_z);
+            
+gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + 0.5; //last term is how tall above case to make button stick out
             
             
 
@@ -212,7 +215,7 @@ gasket_individual_button_wall_z = (case_thickness_under_bolt_head+bolt_head_heig
 //
 
 //translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
-    gasket_case();
+//    gasket_case();
 //}
 //
 //translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
@@ -221,6 +224,8 @@ gasket_individual_button_wall_z = (case_thickness_under_bolt_head+bolt_head_heig
     
 //    gasket_screen();
 //    gasket_screen_v2();
+//    gasket_screen_v3("gasket");
+    gasket_screen_v3("shims");
 //}
 //}
 //
@@ -373,6 +378,90 @@ module gasket_screen_v2(){
     }
 }
 //end module gasket_screen_v2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+module gasket_screen_v3(object){
+    //this gasket is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
+    if (object == "gasket"){     
+         difference(){
+            union(){
+                //main plane that is squished between case and pcb/screen
+                linear_extrude(gasket_screen_visible_z){
+                    rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
+                }
+                
+                //add area around buttons themselves to form tpu sheaths, reminder: this button height is set by how far I want them to stick out of case top - heh as long as case top height and gasket heights are more than the button heigt itself... a check for that would be good...
+//                echo("Button is Xmm above gasket: ", button_z+gasket_individual_button_wall_z - (gasket_case_z+gasket_screen_visible_z));
+                
+                translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, gasket_screen_visible_z]){
+                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+                }
+                translate([button_D14_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, gasket_screen_visible_z]){
+                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+                }
+                translate([button_D12_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, gasket_screen_visible_z]){
+                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+                }
+                translate([button_D11_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, gasket_screen_visible_z]){
+                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+                }
+            } //end union
+            
+            //remove stuff from top of pcb
+            translate([0,0,-screen_z]){
+                pcb_top_voids(0,0,0,false);
+            }
+    
+        } //end diff 2
+        
+    } else if (object == "shims") {
+        difference(){
+            //main plane that forms shims at top and bottom of screen, at same plane and thickness as screen - for gasket to be squished down onto
+            linear_extrude(screen_z){
+                rounded_square(size = [pcb_x, pcb_y], corner_r = case_rounding_rad);
+            }
+            
+            //remove stuff from top of pcb
+            pcb_top_voids(0,0,0,false);
+        }
+
+    } //end if else
+}
+//end module gasket_screen_v2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //ugh ok didn't code additions in useful way, but leaving for now. 20220903
