@@ -9,10 +9,11 @@ $fn = 15;
 
 
 //todo update above description of how pieces are printed and go together
+
 //MUST todo make case bottom big enough to hold standoffs, pcb and ?
 //todo might not be needed, but: make gasket lip less wide on pos y edge. or just move bolt holes down (-1mm Y) and reprint top and bottom case. and move bolt holes +1mm x
-//MUST slice screen gasket into two layers, the lower pla bolsters (top and bottom piece seperate), and the top tpu gasket and buttons etc.
-//MUST todo make z void for buttons taller so squishing down top case doesnt permenantly depress the buttons :-(
+//DONE - MUST slice screen gasket into two layers, the lower pla bolsters (top and bottom piece seperate), and the top tpu gasket and buttons etc.
+//DONE - MUST todo make z void for buttons taller so squishing down top case doesnt permenantly depress the buttons :-(
 //todo might not be needed, but: maybe make case 1-3mm wider, and then reprint case gasket too (it is very bumpy anyway)
 //todo might not be needed, but: make rounding radius 4 for nicer case look, then i have to reprint everything except screen gasket, but that needs fixing anyway soooo
 //todo make power button notch in case gasket
@@ -204,7 +205,9 @@ bolt_head_material_around_diam = bolt_head_diam + 2*2;
 gasket_individual_button_wall_z = (case_thickness_under_bolt_head+bolt_head_height) - (button_z - (screen_z+gasket_screen_visible_z)) + 1;
             echo(gasket_individual_button_wall_z);
             
-gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + 0.5; //last term is how tall above case to make button stick out
+gasket_individual_button_rounding_rad = 1;
+            
+gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + gasket_individual_button_rounding_rad; //last term is how tall above case to make button stick out (suggest it be equal to or greater than rounding rad, otherwise button will besmaller than hole at top of case). if you change this term also need to make sure term in button_sheath module doesn't screw up the join of sheath to gasket
             
             
 
@@ -225,13 +228,13 @@ gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + 0
 //    gasket_screen();
 //    gasket_screen_v2();
 //    gasket_screen_v3("gasket");
-    gasket_screen_v3("shims");
+//    gasket_screen_v3("shims");
 //}
 //}
 //
 //translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
 //translate([0,0,gasket_case_z+gasket_screen_visible_z]){
-//    case_top_v2();
+    case_top_v2();
 //}
 //}
 //
@@ -294,6 +297,21 @@ module button(module_button_x, module_button_y, module_button_z){
 //end module button
 
 
+module button_sheath(wall_thickness_x, wall_thickness_y, height, button_rounding_rad){
+    //yeah so this is really simple, but later was thinking to make it more complicated. But maybe not needed?
+//    linear_extrude(height){
+//        rounded_square(size = [button_x+wall_thickness_x*2, button_y+wall_thickness_y*2], corner_r = button_rounding_rad);
+//    }
+    translate([0,0,-button_rounding_rad]){
+        rounded_cube([button_x+wall_thickness_x*2, button_y+wall_thickness_y*2, height+button_rounding_rad],button_rounding_rad);
+    }
+    
+    
+    //    cube([module_button_x, module_button_y, module_button_z]);
+}
+//end module button
+
+//button_x+gasket_individual_button_wall_x*2
 module gasket_screen(){
     //this gasket is squished between pcb/screen and top of case. screws come from top, trhrough tpu, into standoff attached to bottom of pcb
     difference(){
@@ -408,16 +426,17 @@ module gasket_screen_v3(object){
 //                echo("Button is Xmm above gasket: ", button_z+gasket_individual_button_wall_z - (gasket_case_z+gasket_screen_visible_z));
                 
                 translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, gasket_screen_visible_z]){
-                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+//                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+                    button_sheath(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad);
                 }
                 translate([button_D14_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, gasket_screen_visible_z]){
-                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+                    button_sheath(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad);
                 }
                 translate([button_D12_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, gasket_screen_visible_z]){
-                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+                    button_sheath(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad);
                 }
                 translate([button_D11_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x, pcb_button_neg_y_offset - gasket_individual_button_wall_y, gasket_screen_visible_z]){
-                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
+                    button_sheath(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad);
                 }
             } //end union
             
@@ -618,16 +637,16 @@ module case_top_v2() {
                             //add area around buttons themselves
 //            echo("Button is Xmm above gasket: ", button_z+gasket_individual_button_wall_z - (gasket_case_z+gasket_screen_visible_z));
             translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x-case_button_gap, pcb_button_neg_y_offset - gasket_individual_button_wall_y-case_button_gap, 0]){
-                button(button_x+gasket_individual_button_wall_x*2+case_button_gap*2, button_y+gasket_individual_button_wall_y*2+case_button_gap*2, button_z+gasket_individual_button_wall_z);
+                    button_sheath(gasket_individual_button_wall_x+case_button_gap, gasket_individual_button_wall_y+case_button_gap, gasket_individual_button_z+5, gasket_individual_button_rounding_rad);
             }
             translate([button_D14_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x-case_button_gap, pcb_button_neg_y_offset - gasket_individual_button_wall_y-case_button_gap, 0]){
-                button(button_x+gasket_individual_button_wall_x*2+case_button_gap*2, button_y+gasket_individual_button_wall_y*2+case_button_gap*2, button_z+gasket_individual_button_wall_z);
+                    button_sheath(gasket_individual_button_wall_x+case_button_gap, gasket_individual_button_wall_y+case_button_gap, gasket_individual_button_z+5, gasket_individual_button_rounding_rad);
             }
             translate([button_D12_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x-case_button_gap, pcb_button_neg_y_offset - gasket_individual_button_wall_y-case_button_gap, 0]){
-                button(button_x+gasket_individual_button_wall_x*2+case_button_gap*2, button_y+gasket_individual_button_wall_y*2+case_button_gap*2, button_z+gasket_individual_button_wall_z);
+                    button_sheath(gasket_individual_button_wall_x+case_button_gap, gasket_individual_button_wall_y+case_button_gap, gasket_individual_button_z+5, gasket_individual_button_rounding_rad);
             }
             translate([button_D11_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x-case_button_gap, pcb_button_neg_y_offset - gasket_individual_button_wall_y-case_button_gap, 0]){
-                button(button_x+gasket_individual_button_wall_x*2+case_button_gap*2, button_y+gasket_individual_button_wall_y*2+case_button_gap*2, button_z+gasket_individual_button_wall_z);
+                    button_sheath(gasket_individual_button_wall_x+case_button_gap, gasket_individual_button_wall_y+case_button_gap, gasket_individual_button_z+5, gasket_individual_button_rounding_rad);
             }
             
 //                cube([case_button_void_x, case_button_void_y, z_exaggeration]);
