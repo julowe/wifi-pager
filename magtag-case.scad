@@ -59,7 +59,7 @@ bolt_head_height = 3.25; //make greater to have bolt head recessed, measured at 
 case_inner_x = 92; //this is a little bit of room away from screen ribbon cable and qi rx ribbon cable
 case_inner_y = 60+2; //first guess 68; //this is a little bit of room away from side of qi rx pad // 60 is actually wide enough, but looks off balance, so adding a little back jsut for top of case aesthetics
 //case_bottom_void_z = 10; //changed, define this dymaically with realwaorld dimensions of standoffs and bolt head etc
-case_wall_vertical_thickness = 3; //ugh really this shoudl be 'case_vertical_wall_thickness'
+case_wall_vertical_thickness = 2; //ugh really this shoudl be 'case_vertical_wall_thickness'
 case_wall_top_thickness = 2;
 case_wall_bottom_thickness = 3;
 case_rounding_rad = 4;
@@ -235,35 +235,38 @@ gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + g
 //
  
 
-//translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
-//    gasket_case();
-//}
-//
-//translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
+    gasket_case();
+    translate([gasket_case_x/2 - pcb_x/2, gasket_case_y/2 - pcb_y/2,0]){ //if this overlaps on render, then it will also overlap in the case itself
+        gasket_screen_v3("gasket");
+    }
+}
 
-//translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){ //align coords to align gasket and case top
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
+
+translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){ //align coords to align gasket and case top
     
 //    gasket_screen();
 //    gasket_screen_v2();
 //    gasket_screen_v3("gasket");
-//    gasket_screen_v3("shims");
-//}
-//}
-//
-//translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
-//translate([0,0,gasket_case_z+gasket_screen_visible_z]){
-//    case_top_v2();
-//}
-//}
-//
-//translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15/2, 15, 0]){
-//    for (i = [0:3]) {
-//        translate([0,i*bolt_head_diam+(i+1)*5,0]){
-//            gasket_bolt_head();
-//        }
-//    }
-//}
-//
+    gasket_screen_v3("shims");
+}
+}
+
+translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
+translate([0,0,gasket_case_z+gasket_screen_visible_z]){
+    case_top_v2();
+}
+}
+
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15/2, 15, 0]){
+    for (i = [0:3]) {
+        translate([0,i*bolt_head_diam+(i+1)*5,0]){
+            gasket_bolt_head();
+        }
+    }
+}
+
 case_bottom();
 
 
