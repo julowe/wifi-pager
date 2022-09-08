@@ -4,7 +4,7 @@
 use <../dotSCAD/src/rounded_cube.scad>;
 use <../dotSCAD/src/rounded_square.scad>
 
-$fn = 15;
+$fn = 90;
 //question - make tpu gasket thick all the way aroudn oter edge of case and make top be even with gasket around screen, then print with gasket away from screen on bed, then have gasket drip down to accomodate screen height?
 
 
@@ -49,11 +49,15 @@ light0_pos_x_edge_to_pcb_neg_x_edge = 66;
 
 z_exaggeration = 10;
 
+gasket_bolt_head_z = extrusion_height_tpu_min*2;
+
 bolt_diam = 3.25;
 //bolt_diam_tpu = bolt_diam - 0.25 + 2.45+3; //used to show heatset insert and wall diam
 bolt_diam_tpu = bolt_diam - 0.25;
 bolt_head_diam = 6;
-bolt_head_height = 3.25; //make greater to have bolt head recessed, measured at 3-3.05
+bolt_head_height = 3.25 + gasket_bolt_head_z; //make greater to have bolt head recessed, measured at 3-3.05
+
+
 
 
 case_inner_x = 92; //this is a little bit of room away from screen ribbon cable and qi rx ribbon cable
@@ -237,33 +241,35 @@ gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + g
 
 translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
     gasket_case();
+    
     translate([gasket_case_x/2 - pcb_x/2, gasket_case_y/2 - pcb_y/2,0]){ //if this overlaps on render, then it will also overlap in the case itself
         gasket_screen_v3("gasket");
     }
-}
-
-translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
-
-translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){ //align coords to align gasket and case top
     
-//    gasket_screen();
-//    gasket_screen_v2();
-//    gasket_screen_v3("gasket");
-    gasket_screen_v3("shims");
+    number_of_bolt_gaskets = 8;
+    iteration_j_rows = 2;
+    iteration_i = number_of_bolt_gaskets/iteration_j_rows; //ok just dont make this a non-natural number ok?
+    translate([gasket_case_x/2 - ((iteration_i-1)*bolt_head_diam*1.2)/2, gasket_case_y/2 - ((iteration_j_rows-1)*bolt_head_diam*1.2)/2,0]){
+        for (i = [0:3]) {
+            for (j = [0:1]) {
+                translate([i*bolt_head_diam*1.2,j*bolt_head_diam*1.2,0]){
+                    gasket_bolt_head();
+                }
+            }
+        }
+    }
 }
+
+// render plastic shims that go around screen to create even plane wiht top of e-ink screen
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
+    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){ //align coords to align gasket and case top
+        gasket_screen_v3("shims");
+    }
 }
 
 translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
-translate([0,0,gasket_case_z+gasket_screen_visible_z]){
-    case_top_v2();
-}
-}
-
-translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15/2, 15, 0]){
-    for (i = [0:3]) {
-        translate([0,i*bolt_head_diam+(i+1)*5,0]){
-            gasket_bolt_head();
-        }
+    translate([0,0,gasket_case_z+gasket_screen_visible_z]){
+        case_top_v2();
     }
 }
 
@@ -283,8 +289,8 @@ case_bottom();
 
 module gasket_bolt_head(){
     difference(){
-        cylinder(extrusion_height_tpu_min*2, (bolt_head_diam-0.5)/2, (bolt_head_diam-0.5)/2);
-        cylinder(extrusion_height_tpu_min*2, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        cylinder(gasket_bolt_head_z, (bolt_head_diam-0.5)/2, (bolt_head_diam-0.5)/2);
+        cylinder(gasket_bolt_head_z, bolt_diam_tpu/2, bolt_diam_tpu/2);
     }
 }
 //end module gasket_bolt_head
