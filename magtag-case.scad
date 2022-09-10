@@ -4,7 +4,7 @@
 use <../dotSCAD/src/rounded_cube.scad>;
 use <../dotSCAD/src/rounded_square.scad>
 
-$fn = 30;
+$fn = 15;
 //question - make tpu gasket thick all the way aroudn oter edge of case and make top be even with gasket around screen, then print with gasket away from screen on bed, then have gasket drip down to accomodate screen height?
 
 
@@ -246,7 +246,7 @@ button_to_tpu_gap = 0.2;
 //    gasket_case();
 //    
 //    translate([gasket_case_x/2 - pcb_x/2, gasket_case_y/2 - pcb_y/2,0]){ //if this overlaps on render, then it will also overlap in the case itself
-//        gasket_screen_v3("gasket");
+        gasket_screen_v3("gasket");
 //    }
 //    
 //    number_of_bolt_gaskets = 8;
@@ -272,7 +272,7 @@ button_to_tpu_gap = 0.2;
 //
 //translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
 //    translate([0,0,gasket_case_z+gasket_screen_visible_z]){
-        case_top_v2();
+//        case_top_v2();
 //    }
 //}
 
@@ -408,16 +408,16 @@ module gasket_screen_v3(object){
                 
                 translate([button_D15_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x-button_to_tpu_gap, pcb_button_neg_y_offset - gasket_individual_button_wall_y-button_to_tpu_gap, gasket_screen_visible_z]){
 //                    button(button_x+gasket_individual_button_wall_x*2, button_y+gasket_individual_button_wall_y*2, gasket_individual_button_z);
-                    button_sheath_v2(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad, button_x+button_to_tpu_gap*2, button_y+button_to_tpu_gap*2, button_z);
+                    button_sheath_v2(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad, button_x+button_to_tpu_gap*2, button_y+button_to_tpu_gap*2, button_z, true);
                 }
                 translate([button_D14_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x-button_to_tpu_gap, pcb_button_neg_y_offset - gasket_individual_button_wall_y-button_to_tpu_gap, gasket_screen_visible_z]){
-                    button_sheath_v2(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad, button_x+button_to_tpu_gap*2, button_y+button_to_tpu_gap*2, button_z);
+                    button_sheath_v2(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad, button_x+button_to_tpu_gap*2, button_y+button_to_tpu_gap*2, button_z, true);
                 }
                 translate([button_D12_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x-button_to_tpu_gap, pcb_button_neg_y_offset - gasket_individual_button_wall_y-button_to_tpu_gap, gasket_screen_visible_z]){
-                    button_sheath_v2(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad, button_x+button_to_tpu_gap*2, button_y+button_to_tpu_gap*2, button_z);
+                    button_sheath_v2(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad, button_x+button_to_tpu_gap*2, button_y+button_to_tpu_gap*2, button_z, true);
                 }
                 translate([button_D11_center_pcb_edge_neg_x_offset-button_x/2-gasket_individual_button_wall_x-button_to_tpu_gap, pcb_button_neg_y_offset - gasket_individual_button_wall_y-button_to_tpu_gap, gasket_screen_visible_z]){
-                    button_sheath_v2(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad, button_x+button_to_tpu_gap*2, button_y+button_to_tpu_gap*2, button_z);
+                    button_sheath_v2(gasket_individual_button_wall_x, gasket_individual_button_wall_y, gasket_individual_button_z, gasket_individual_button_rounding_rad, button_x+button_to_tpu_gap*2, button_y+button_to_tpu_gap*2, button_z, true);
                 }
             } //end union
             
