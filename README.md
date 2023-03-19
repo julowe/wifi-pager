@@ -25,12 +25,13 @@ To create said STL hit the F6 button or go to the menu 'Design' > 'Render'. Wait
 NB: Objects in the lower right are to be printed out of TPU or some other flexible filament. This includes the larger rectangular gasket with rounded corners and a raised interior lip, the smaller gasket with integrated buttons, and the 8 washers. In the end I think using an actual O-ring or 1.75mm TPU filament cut straight from the roll may be better than the two printed gaskets, but that idea was formed after I saw how uneven the flat surfaces were on printed TPU objects. We'll see.
 
 ## BOM
-[Adafruit MagTag](https://www.adafruit.com/product/4800) often sold at Adafruit, because resellers buy in bulk. So search online.
-[Compact USB-C Qi Receiver](https://www.amazon.com/gp/product/B07CVXW3MV/) Hack down the case around the Qi loop & PCB so if can fit in the case
+- [Adafruit MagTag](https://www.adafruit.com/product/4800) often sold at Adafruit, because resellers buy in bulk. So search online.
+- [Compact USB-C Qi Receiver](https://www.amazon.com/gp/product/B07CVXW3MV/) Hack down the case around the Qi loop & PCB so if can fit in the case
 
 ## TODO
 - [ ] make error message display on magtag screen if on boot you can't reach wifi
 - [ ] review code and see what TODOs are there and what other problems there are
 - [ ] change case to use countersunk 3mm head depth bolts, vs 5mm depth socket cap bolts
+- [ ] How thin can i print TPU gaskets? Would just one layer be smoother? Or make channel for unprinted TPU filament/O-ring?
 - [ ] test then documents soldering Qi receiver directly to PCB
 - [ ] shrink case dimensions now that Qi receiver is smaller and no USB-C sticking out 
