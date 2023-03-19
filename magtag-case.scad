@@ -4,7 +4,11 @@
 use <../dotSCAD/src/rounded_cube.scad>;
 use <../dotSCAD/src/rounded_square.scad>
 
-$fn = 15;
+rough_preview_fns = 20;
+render_fns = 90;
+
+$fn = $preview ? rough_preview_fns : render_fns;
+
 //question - make tpu gasket thick all the way aroudn oter edge of case and make top be even with gasket around screen, then print with gasket away from screen on bed, then have gasket drip down to accomodate screen height?
 
 
@@ -137,8 +141,8 @@ button_D12_center_pcb_edge_neg_x_offset = 48.26; // eagle brd file
 button_D11_center_pcb_edge_neg_x_offset = 64.77; // eagle brd file
 
 
-gasket_individual_button_wall_x = extrusion_width_tpu_min*1;
-gasket_individual_button_wall_y = extrusion_width_tpu_min*1;
+gasket_individual_button_wall_x = extrusion_width_tpu_min*1.5;
+gasket_individual_button_wall_y = extrusion_width_tpu_min*1.5;
 //define z below according to case height
 //gasket_individual_button_wall_z = extrusion_height_tpu_min*2; 
 
