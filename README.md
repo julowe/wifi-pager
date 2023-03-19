@@ -29,8 +29,8 @@ NB: Objects in the lower right are to be printed out of TPU or some other flexib
 [Compact USB-C Qi Receiver](https://www.amazon.com/gp/product/B07CVXW3MV/) Hack down the case around the Qi loop & PCB so if can fit in the case
 
 ## TODO
-[] make error message display on magtag screen if on boot you can't reach wifi
-[] review code and see what TODOs are there and what other problems there are
-[] change case to use countersunk 3mm head depth bolts, vs 5mm depth socket cap bolts
-[] test then documents soldering Qi receiver directly to PCB
-[] shrink case dimensions now that Qi receiver is smaller and no USB-C sticking out 
+- [ ] make error message display on magtag screen if on boot you can't reach wifi
+- [ ] review code and see what TODOs are there and what other problems there are
+- [ ] change case to use countersunk 3mm head depth bolts, vs 5mm depth socket cap bolts
+- [ ] test then documents soldering Qi receiver directly to PCB
+- [ ] shrink case dimensions now that Qi receiver is smaller and no USB-C sticking out 
