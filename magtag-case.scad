@@ -5,29 +5,26 @@ use <../dotSCAD/src/rounded_cube.scad>;
 use <../dotSCAD/src/rounded_square.scad>
 
 rough_preview_fns = 20;
-render_fns = 90;
+render_fns = 30;
 
 $fn = $preview ? rough_preview_fns : render_fns;
+offset_for_preview = $preview ? 0.005 : 0;
 
 //question - make tpu gasket thick all the way aroudn oter edge of case and make top be even with gasket around screen, then print with gasket away from screen on bed, then have gasket drip down to accomodate screen height?
 
-
 //todo update above description of how pieces are printed and go together
 
-// DONE MUST todo make case bottom big enough to hold standoffs, pcb and ?
-// DONE (made case bigger by 2mmX 1mmY and moved bolt holes 1mm towards negY and posX) - todo might not be needed, but: make gasket lip less wide on pos y edge. or just move bolt holes down (-1mm Y) and reprint top and bottom case. and move bolt holes +1mm x
-// DONE - MUST slice screen gasket into two layers, the lower pla bolsters (top and bottom piece seperate), and the top tpu gasket and buttons etc.
-// DONE - MUST todo make z void for buttons taller so squishing down top case doesnt permenantly depress the buttons :-(
-// DONE todo might not be needed, but: maybe make case 1-3mm wider, and then reprint case gasket too (it is very bumpy anyway)
-// DONE todo might not be needed, but: make rounding radius 4 for nicer case look, then i have to reprint everything except screen gasket, but that needs fixing anyway soooo
 //todo make power button notch in case gasket. or just cut manually after printing?
+//TODO do countersunk bolts with shorter heads make buttons shorter-enough so they are not esaier to press??
 //todo make buttons have thinner walls, so they compress easier?
-//todo make clear plastic cylinder with cutout to snug against LEDs - to better transmit light upwards?
+//todo make clear plastic cylinder (acrylic?) with cutout to snug against LEDs - to better transmit light upwards?
+//TODO move all user definable variables to top? or woudl that remove them from their sections?
 
 //todo set correct extrusion widths and heights for tpu??
 
 extrusion_width_tpu_min = 0.5; //actually .45 TODO reprint buttons and top case
 extrusion_height_tpu_min = 0.2;
+extrusion_height = 0.2;
 pcb_x = 80;
 pcb_y = 53.5;
 pcb_z = 1.65; //caliper 1.5-1.65
@@ -55,13 +52,15 @@ light0_pos_x_edge_to_pcb_neg_x_edge = 66;
 
 z_exaggeration = 10;
 
-gasket_bolt_head_z = extrusion_height_tpu_min*2;
+gasket_bolt_head_z = extrusion_height_tpu_min*2; //account for height of TPU gasket
 
 bolt_diam = 3.25;
 //bolt_diam_tpu = bolt_diam - 0.25 + 2.45+3; //used to show heatset insert and wall diam
 bolt_diam_tpu = bolt_diam - 0.25;
 bolt_head_diam = 6;
-bolt_head_height = 3.25 + gasket_bolt_head_z; //make greater to have bolt head recessed, measured at 3-3.05
+bolt_head_upper_diam = 6;
+//bolt_head_height = 3 + gasket_bolt_head_z; //make greater to have bolt head recessed, measured at 3-3.05
+bolt_head_height = 2; //make greater to have bolt head recessed, measured at 3-3.05 //TODO check bolt head against real world test print and i decouple gasket from bolt head correctly in code
 
 
 
@@ -70,12 +69,20 @@ case_inner_x = 92; //this is a little bit of room away from screen ribbon cable 
 case_inner_y = 60+2; //first guess 68; //this is a little bit of room away from side of qi rx pad // 60 is actually wide enough, but looks off balance, so adding a little back jsut for top of case aesthetics
 //case_bottom_void_z = 10; //changed, define this dymaically with realwaorld dimensions of standoffs and bolt head etc
 case_wall_vertical_thickness = 2; //ugh really this shoudl be 'case_vertical_wall_thickness'
-case_wall_top_thickness = 2;
-case_wall_bottom_thickness = 3;
-case_rounding_rad = 4;
-case_thickness_under_bolt_head = 1;
+//case_wall_top_thickness = 2; //not used
+//case_wall_bottom_thickness = 3; //not used. now using case_bottom_z
 
+case_rounding_rad = 3;
+case_thickness_under_bolt_head = extrusion_height*3; //TODO test against real worl dtest print - is this little enough since it is countersunk?
 
+if (case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z < case_rounding_rad){
+    assert(false, "Is the case_rounding_rad greater than the case top height?");
+}
+case_top_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
+echo(case_top_z);
+
+case_bottom_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
+echo(case_bottom_z);
 
 case_neg_x_to_standoff_edge_distance = 3;
 case_pos_x_to_standoff_edge_distance = 9; //ha wow measurements equal each other (78 outer standoffs + 9 + 3 = 90)
@@ -209,13 +216,15 @@ heatset_insert_height = 5;
 
 
 
-bolt_head_material_under_bottom_case_z = 2; //how much i want under bolt head to support its pulling pressure
-bolt_head_extra_material_under_bottom_case_z = bolt_head_material_under_bottom_case_z - (case_wall_bottom_thickness-bolt_head_height); //said space defined above will exist already if caes is very thick and bolt head very small. so could even be an inset value... i suppose manually check that there is actually room for battery and under such under PCB tings inside the rendered case... ugh.
-echo("There is ", bolt_head_extra_material_under_bottom_case_z, " mm extra material under the bolt on bottom of case");
 
-air_gap_between_standoff_and_material_under_bolt_head = 1;
+//bolt_head_extra_material_under_bottom_case_z = bolt_head_material_under_bottom_case_z - (case_wall_bottom_thickness-bolt_head_height-gasket_bolt_head_z); //said space defined above will exist already if caes is very thick and bolt head very small. so could even be an inset value... i suppose manually check that there is actually room for battery and under such under PCB tings inside the rendered case... ugh. //TODO check depth with new math and with new qi charger etc.
+//echo("There is ", bolt_head_extra_material_under_bottom_case_z, " mm extra material under the bolt on bottom of case");
+//echo(0.2*3 - (3-2-0.4));
 
-case_bottom_void_z = bolt_head_extra_material_under_bottom_case_z + air_gap_between_standoff_and_material_under_bolt_head + standoff_height + pcb_z + screen_z + gasket_screen_visible_z - gasket_case_z;
+air_gap_between_standoff_and_material_under_bolt_head = 1; //TODO, do i want an air gap, or do i want it flush to be more sturdy and just make a column if need to bridge diff?? //AKA how much extra room do i want under pcb standoffs?? not really.
+
+case_bottom_void_z = air_gap_between_standoff_and_material_under_bolt_head + standoff_height + pcb_z + screen_z + gasket_screen_visible_z - gasket_case_z;
+echo(case_bottom_void_z);
 
 //case gasekt - (screen gasket + pcb height) 
 //standoff_height;
@@ -224,12 +233,12 @@ case_bottom_void_z = bolt_head_extra_material_under_bottom_case_z + air_gap_betw
 bolt_head_material_around_diam = bolt_head_diam + 2*2;
 
 
-gasket_individual_button_wall_z = (case_thickness_under_bolt_head+bolt_head_height) - (button_z - (screen_z+gasket_screen_visible_z)) + 1;
+gasket_individual_button_wall_z = (case_top_z) - (button_z - (screen_z+gasket_screen_visible_z)) + 1;
             echo(gasket_individual_button_wall_z);
             
 gasket_individual_button_rounding_rad = 1;
             
-gasket_individual_button_z = case_thickness_under_bolt_head+bolt_head_height + gasket_individual_button_rounding_rad; //last term is how tall above case to make button stick out (suggest it be equal to or greater than rounding rad, otherwise button will besmaller than hole at top of case). if you change this term also need to make sure term in button_sheath module doesn't screw up the join of sheath to gasket
+gasket_individual_button_z = case_top_z + gasket_individual_button_rounding_rad; //last term is how tall above case to make button stick out (suggest it be equal to or greater than rounding rad, otherwise button will besmaller than hole at top of case). if you change this term also need to make sure term in button_sheath module doesn't screw up the join of sheath to gasket
             
             
 button_to_tpu_gap = 0.2;
@@ -246,41 +255,41 @@ button_to_tpu_gap = 0.2;
 //
  
 
-//translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
-//    gasket_case();
-//    
-//    translate([gasket_case_x/2 - pcb_x/2, gasket_case_y/2 - pcb_y/2,0]){ //if this overlaps on render, then it will also overlap in the case itself
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
+    gasket_case();
+    
+    translate([gasket_case_x/2 - pcb_x/2, gasket_case_y/2 - pcb_y/2,0]){ //if this overlaps on render, then it will also overlap in the case itself
         gasket_screen_v3("gasket");
-//    }
-//    
-//    number_of_bolt_gaskets = 8;
-//    iteration_j_rows = 2;
-//    iteration_i = number_of_bolt_gaskets/iteration_j_rows; //ok just dont make this a non-natural number ok?
-//    translate([gasket_case_x/2 - ((iteration_i-1)*bolt_head_diam*1.2)/2, gasket_case_y/2 - ((iteration_j_rows-1)*bolt_head_diam*1.2)/2,0]){
-//        for (i = [0:3]) {
-//            for (j = [0:1]) {
-//                translate([i*bolt_head_diam*1.2,j*bolt_head_diam*1.2,0]){
-//                    gasket_bolt_head();
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//// render plastic shims that go around screen to create even plane wiht top of e-ink screen
-//translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
-//    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){ //align coords to align gasket and case top
-//        gasket_screen_v3("shims");
-//    }
-//}
-//
-//translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
-//    translate([0,0,gasket_case_z+gasket_screen_visible_z]){
-//        case_top_v2();
-//    }
-//}
+    }
+    
+    number_of_bolt_gaskets = 8;
+    iteration_j_rows = 2;
+    iteration_i = number_of_bolt_gaskets/iteration_j_rows; //ok just dont make this a non-natural number ok?
+    translate([gasket_case_x/2 - ((iteration_i-1)*bolt_head_diam*1.2)/2, gasket_case_y/2 - ((iteration_j_rows-1)*bolt_head_diam*1.2)/2,0]){
+        for (i = [0:3]) {
+            for (j = [0:1]) {
+                translate([i*bolt_head_diam*1.2,j*bolt_head_diam*1.2,0]){
+                    gasket_bolt_head();
+                }
+            }
+        }
+    }
+}
 
-//case_bottom();
+// render plastic shims that go around screen to create even plane wiht top of e-ink screen
+translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
+    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){ //align coords to align gasket and case top
+        gasket_screen_v3("shims");
+    }
+}
+
+translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
+    translate([0,0,gasket_case_z+gasket_screen_visible_z]){
+        case_top_v2();
+    }
+}
+
+case_bottom();
 
 
 
@@ -371,7 +380,7 @@ module button_sheath_v2(wall_thickness_x, wall_thickness_y, height, button_round
         //button_z-screen_z
         
         if (floating_button) {
-            echo("doing");
+//            echo("doing");
             difference(){
                 //move up this object that will be taken out of button sheath to the top of the button minus the scrren_z/shim offset plus one layer of tpu so it isn't floating. then cut that one layer post print to float cetner post of tpu against button
                 translate([wall_thickness_x,wall_thickness_y,module_button_z-screen_z-gasket_screen_visible_z+extrusion_height_tpu_min]){
@@ -493,26 +502,27 @@ module pcb_top_voids(x_addition, y_addition, z_addition, z_exaggegerate){
     }
     
 
-    //remove area for screws to go through
+    //remove area for bolt shafts to go through
     //neg x neg y
+    //TODO all changed from bolt_diam_tpu to bolt_diam - check against test print
     translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-        //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
-        cylinder(gasket_case_z+gasket_screen_visible_z+z_exaggeration, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam
+        cylinder(gasket_case_z+gasket_screen_visible_z+z_exaggeration, bolt_diam/2, bolt_diam/2);
     }
     //pos x neg y
     translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-        //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
-        cylinder(gasket_case_z+gasket_screen_visible_z+z_exaggeration, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam
+        cylinder(gasket_case_z+gasket_screen_visible_z+z_exaggeration, bolt_diam/2, bolt_diam/2);
     }
     //pos x pos y
     translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-        //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
-        cylinder(gasket_case_z+gasket_screen_visible_z+z_exaggeration, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam
+        cylinder(gasket_case_z+gasket_screen_visible_z+z_exaggeration, bolt_diam/2, bolt_diam/2);
     }
     //neg x pos y
     translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-        //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam_tpu
-        cylinder(gasket_case_z+gasket_screen_visible_z+z_exaggeration, bolt_diam_tpu/2, bolt_diam_tpu/2);
+        //standoff_pcb_edge_offset + standoff_diameter/2   bolt_diam
+        cylinder(gasket_case_z+gasket_screen_visible_z+z_exaggeration, bolt_diam/2, bolt_diam/2);
     }
     
     //remove area for lights
@@ -535,9 +545,9 @@ module case_top_v2() {
     difference(){
         //make rounded case
         translate([0,0,-(case_rounding_rad*2)]){
-            rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_thickness_under_bolt_head+bolt_head_height+(case_rounding_rad*2)],case_rounding_rad);
+            rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_top_z+(case_rounding_rad*2)],case_rounding_rad);
         }
-        echo("Case is Xmm tall: ", case_thickness_under_bolt_head+bolt_head_height);
+        echo("Case is Xmm tall: ", case_top_z);
         
         //remove fake bottom half of rounded case
         translate([0,0,-(case_rounding_rad*2)]){
@@ -549,43 +559,56 @@ module case_top_v2() {
             //build part that interfaces with gasket
 //            cube([pcb_x,pcb_y,10]);
             
-            //remove pcb stuff, translate down because don't remove screen bits, this piece starts at top of gasket, which is level
+            //remove pcb stuff including bolt shafts (but not heads), translate down because don't remove screen bits, this piece starts at top of gasket, which is level
             translate([0, 0, -(gasket_case_z+gasket_screen_visible_z)]){
                 pcb_top_voids(0.4,0.4,0.4,true); //this does remove button voids, but we subtract even more down lower with rounded button sheaths
             }
 
             
             //remove area for lights
+            // TODO this didn't actually work well for all colors, change size of holes or shape or get acrylic light tube in there??
             //from left to right are lights 3, 2, 1, 0
             translate([light3_pos_x_edge_to_pcb_neg_x_edge-light_x/2, pcb_y - gasket_void_lights_y+3,0]){
-                cylinder(case_thickness_under_bolt_head+bolt_head_height-0.6,5/2,5/2);
+                cylinder(case_top_z-0.6,5/2,5/2);
             }
             translate([light2_pos_x_edge_to_pcb_neg_x_edge-light_x/2, pcb_y - gasket_void_lights_y+3,0]){
-                cylinder(case_thickness_under_bolt_head+bolt_head_height-0.6,5/2,5/2);
+                cylinder(case_top_z-0.6,5/2,5/2);
             }
             translate([light1_pos_x_edge_to_pcb_neg_x_edge-light_x/2, pcb_y - gasket_void_lights_y+3,0]){
-                cylinder(case_thickness_under_bolt_head+bolt_head_height-0.6,5/2,5/2);
+                cylinder(case_top_z-0.6,5/2,5/2);
             }
             translate([light0_pos_x_edge_to_pcb_neg_x_edge-light_x/2, pcb_y - gasket_void_lights_y+3,0]){
-                cylinder(case_thickness_under_bolt_head+bolt_head_height-0.6,5/2,5/2);
+                cylinder(case_top_z-0.6,5/2,5/2);
             }
             
-            //remove area for screws to go through
-            //neg x neg y
+            //remove area for countersunk bolt heads
+            //neg x neg y (+0.005 so preview doesnt have artifacts)
             translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, case_thickness_under_bolt_head]){
-                cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
+                cylinder(bolt_head_height+offset_for_preview, bolt_diam/2, bolt_head_upper_diam/2);
+                translate([0,0,bolt_head_height]){
+                    cylinder(gasket_bolt_head_z*2, bolt_head_upper_diam/2, bolt_head_upper_diam/2); //FIXME?? if only gasket_bolt_head_z and not gasket_bolt_head_z*2 then i get a very thin surface... I guess is that an artifact of rounded case module??
+                }
             }
             //pos x neg y
             translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, case_thickness_under_bolt_head]){
-                cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
+                cylinder(bolt_head_height+offset_for_preview, bolt_diam/2, bolt_head_upper_diam/2);
+                translate([0,0,bolt_head_height]){
+                    cylinder(gasket_bolt_head_z*2, bolt_head_upper_diam/2, bolt_head_upper_diam/2); //FIXME?? if only gasket_bolt_head_z and not gasket_bolt_head_z*2 then i get a very thin surface... I guess is that an artifact of rounded case module??
+                }
             }
             //pos x pos y
             translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), case_thickness_under_bolt_head]){
-                cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
+                cylinder(bolt_head_height+offset_for_preview, bolt_diam/2, bolt_head_upper_diam/2);
+                translate([0,0,bolt_head_height]){
+                    cylinder(gasket_bolt_head_z*2, bolt_head_upper_diam/2, bolt_head_upper_diam/2); //FIXME?? if only gasket_bolt_head_z and not gasket_bolt_head_z*2 then i get a very thin surface... I guess is that an artifact of rounded case module??
+                }
             }
             //neg x pos y
             translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), case_thickness_under_bolt_head]){
-                cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
+                cylinder(bolt_head_height+offset_for_preview, bolt_diam/2, bolt_head_upper_diam/2);
+                translate([0,0,bolt_head_height]){
+                    cylinder(gasket_bolt_head_z*2, bolt_head_upper_diam/2, bolt_head_upper_diam/2); //FIXME?? if only gasket_bolt_head_z and not gasket_bolt_head_z*2 then i get a very thin surface... I guess is that an artifact of rounded case module??
+                }
             }
             
             
@@ -656,9 +679,10 @@ module case_bottom() {
         union(){
             difference(){
                 //make rounded cube for outer case
-                rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_bottom_void_z + case_wall_bottom_thickness + (case_rounding_rad*2)],case_rounding_rad);
+                rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_bottom_void_z + case_bottom_z + (case_rounding_rad*2)],case_rounding_rad);
                 
-                //remove initials from bottom of case
+                //remove material from bottom of case to show my initials 
+                //TODO move initials to mark center of qi RX loop
                 inlay_y = case_inner_y*0.7;
                 inlay_z = 1;
                 translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)/4 - 10, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)/2 - inlay_y/2+inlay_y, 0]){ //inlay translation a bit of magic numbers
@@ -680,86 +704,79 @@ module case_bottom() {
                 
             
                 //remove fake top half of rounded case, so we have a smooth top plane of case
-                translate([0,0,case_bottom_void_z + case_wall_bottom_thickness]){
+                translate([0,0,case_bottom_void_z + case_bottom_z]){
                     cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_rounding_rad*2]);
                 }
                 
                 //remove rounded inner void
-                translate([case_wall_vertical_thickness, case_wall_vertical_thickness, case_wall_bottom_thickness]){
+                translate([case_wall_vertical_thickness, case_wall_vertical_thickness, case_bottom_z]){
                     rounded_cube([case_inner_x, case_inner_y, 10 + (case_rounding_rad*2)],case_rounding_rad);
                 }
                 
-                //subtract area for standoff to be recessed into case when case bottom wall is thick.
-                //not sure when we woudl want it very thick, would also impede qi reception
-                if (bolt_head_extra_material_under_bottom_case_z < 0) { 
-                    echo("yup");
-                    //add plastic cylinders to hold bolt against case bottom
-                    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), case_wall_bottom_thickness+bolt_head_extra_material_under_bottom_case_z]){
-                        //neg x neg y
-                        translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-                            cylinder(-bolt_head_extra_material_under_bottom_case_z, (standoff_diameter*1.1)/2, (standoff_diameter*1.1)/2);
-                        }
-                        //pos x neg y
-                        translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-                            cylinder(-bolt_head_extra_material_under_bottom_case_z, (standoff_diameter*1.1)/2, (standoff_diameter*1.1)/2);
-                        }
-                        //pos x pos y
-                        translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-                            cylinder(-bolt_head_extra_material_under_bottom_case_z, (standoff_diameter*1.1)/2, (standoff_diameter*1.1)/2);
-                        }
-                        //neg x pos y
-                        translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-                            cylinder(-bolt_head_extra_material_under_bottom_case_z, (standoff_diameter*1.1)/2, (standoff_diameter*1.1)/2);
-                        }
-                    }//end translate cylinder add on material
-                } //end if
+
             } //end diff
             
-            if (case_wall_bottom_thickness > 0) {
-                //add plastic cylinders to hold bolt against case bottom
-                translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), case_wall_bottom_thickness]){
-                    //neg x neg y
-                    translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
-                    }
-                    //pos x neg y
-                    translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
-                    }
-                    //pos x pos y
-                    translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
-                    }
-                    //neg x pos y
-                    translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
-                    }
-                }//end translate cylinder add on material
-            } //end if
+            
+            //TODO i thknk this was suppoised to be if bolt_head_material_under_bottom_case_z > 0. but we may want to repurpose this for a extra_z_under_pcb variable (so we can adjust how much extra room to have for, say, qi charger or vibration motor etc)
+//            if (case_wall_bottom_thickness > 0) {
+//                //add plastic cylinders to hold bolt against case bottom
+//                translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), case_bottom_z]){
+//                    //neg x neg y
+//                    translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
+//                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
+//                    }
+//                    //pos x neg y
+//                    translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
+//                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
+//                    }
+//                    //pos x pos y
+//                    translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
+//                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
+//                    }
+//                    //neg x pos y
+//                    translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
+//                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
+//                    }
+//                }//end translate cylinder add on material
+//            } //end if
+
+
         }//end union
         
         //move coordinates to align holes & standoffs
         translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){
 
-            //remove area for bolt heads to go through
+            //remove area for countersunk bolt heads
             //neg x neg y
             translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-                cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
+                cylinder(gasket_bolt_head_z, bolt_head_upper_diam/2, bolt_head_upper_diam/2);
+                translate([0,0,gasket_bolt_head_z]){
+                    cylinder(bolt_head_height, bolt_head_upper_diam/2, bolt_diam/2);
+                }
             }
             //pos x neg y
             translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-                cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
+                cylinder(gasket_bolt_head_z, bolt_head_upper_diam/2, bolt_head_upper_diam/2);
+                translate([0,0,gasket_bolt_head_z]){
+                    cylinder(bolt_head_height, bolt_head_upper_diam/2, bolt_diam/2);
+                }
             }
             //pos x pos y
             translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-                cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
+                cylinder(gasket_bolt_head_z, bolt_head_upper_diam/2, bolt_head_upper_diam/2);
+                translate([0,0,gasket_bolt_head_z]){
+                    cylinder(bolt_head_height, bolt_head_upper_diam/2, bolt_diam/2);
+                }
             }
             //neg x pos y
             translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-                cylinder(bolt_head_height, bolt_head_diam/2, bolt_head_diam/2);
+                cylinder(gasket_bolt_head_z, bolt_head_upper_diam/2, bolt_head_upper_diam/2);
+                translate([0,0,gasket_bolt_head_z]){
+                    cylinder(bolt_head_height, bolt_head_upper_diam/2, bolt_diam/2);
+                }
             }
             
-            //remove area for screws to go through
+            //remove area for bolt shafts to go through
             //neg x neg y
             translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, bolt_head_height]){
                 cylinder(case_bottom_void_z, bolt_diam/2, bolt_diam/2);
