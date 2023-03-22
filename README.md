@@ -29,9 +29,18 @@ NB: Objects in the lower right are to be printed out of TPU or some other flexib
 - [Compact USB-C Qi Receiver](https://www.amazon.com/gp/product/B07CVXW3MV/) Hack down the case around the Qi loop & PCB so if can fit in the case
 
 ## TODO
+
+### v0.9
+- [ ] change case to use countersunk 3mm head depth bolts, vs 5mm depth socket cap bolts
 - [ ] make error message display on magtag screen if on boot you can't reach wifi
 - [ ] review code and see what TODOs are there and what other problems there are
-- [ ] change case to use countersunk 3mm head depth bolts, vs 5mm depth socket cap bolts
+
+I plan to skip v1.0 because a true 1.0 would require me to reprint the bullky case that can fit the old (larger) Qi charger, and I don't want to do that. So leaving v0.9 to reflect that it might not be production ready. v2 will be with directly soldered qi and thus smaller case, so will not be compatible with previous.
+
+### v2.0
 - [ ] How thin can i print TPU gaskets? Would just one layer be smoother? Or make channel for unprinted TPU filament/O-ring?
-- [ ] test then documents soldering Qi receiver directly to PCB
+- [x] Solder Qi receiver directly to PCB
+- [ ] add some hot glue strain relief to Qi board <-> wires & wires <-> PCB
+- [ ] document soldering Qi receiver directly to PCB
 - [ ] shrink case dimensions now that Qi receiver is smaller and no USB-C sticking out 
+- [ ] think about adding vibration motor - space in case for motor, but also what pins to attach it to
