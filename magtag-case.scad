@@ -1,11 +1,11 @@
 //magtag case
 
 //https://openhome.cc/eGossip/OpenSCAD/lib3x-rounded_square.html
-use <../dotSCAD/src/rounded_cube.scad>;
-use <../dotSCAD/src/rounded_square.scad>
+use <dotSCAD/rounded_cube.scad>;
+use <dotSCAD/rounded_square.scad>
 
 rough_preview_fns = 20;
-render_fns = 30;
+render_fns = 60;
 
 $fn = $preview ? rough_preview_fns : render_fns;
 offset_for_preview = $preview ? 0.005 : 0;
