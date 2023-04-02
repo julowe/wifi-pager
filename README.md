@@ -40,7 +40,9 @@ I plan to skip v1.0 because a true 1.0 would require me to reprint the bullky ca
 ### v2.0
 - [ ] How thin can i print TPU gaskets? Would just one layer be smoother? Or make channel for unprinted TPU filament/O-ring?
 - [x] Solder Qi receiver directly to PCB
-- [ ] add some hot glue strain relief to Qi board <-> wires & wires <-> PCB
+- [x] add some hot glue strain relief to Qi board <-> wires & wires <-> PCB
 - [ ] document soldering Qi receiver directly to PCB
 - [ ] shrink case dimensions now that Qi receiver is smaller and no USB-C sticking out 
+
+### v2.1
 - [ ] think about adding vibration motor - space in case for motor, but also what pins to attach it to
