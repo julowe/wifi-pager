@@ -26,7 +26,8 @@ NB: Objects in the lower right are to be printed out of TPU or some other flexib
 
 ## BOM
 - [Adafruit MagTag](https://www.adafruit.com/product/4800) often sold at Adafruit, because resellers buy in bulk. So search online.
-- [Compact USB-C Qi Receiver](https://www.amazon.com/gp/product/B07CVXW3MV/) Hack down the case around the Qi loop & PCB so if can fit in the case
+- Smaller case with solder in Qi Receiver - uses this [bare qi receiver](https://www.amazon.com/gp/product/B08RDMRZL5/). Pictures of where I chose to solder the Qi receiver to be posted in this readme.
+- Larger case with plug in Qi Receiver - uses this [Compact USB-C Qi Receiver](https://www.amazon.com/gp/product/B07CVXW3MV/) NB: You will need to carefully cut down the flexible case around the Qi loop & PCB so if can fit in the case better. Either cut slowly to make sure you are not hitting qi loop or pcb, or the case can be peeled apart to see actual extents of objects inside.
 
 ## TODO
 
