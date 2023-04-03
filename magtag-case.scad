@@ -26,11 +26,10 @@ z_exaggeration = 10; //just the distance to extend objects we subtract to make v
 // AS MEASURED, so decrease for actual changes. 3.1 mm less on neg x side. 4.74 less on neg y side. 1.75-2 on pos y side. but that is with power switch flush to case. 7.02 less on pos x side.
 // CHANGES TO MAKE: 2.5 less on neg x side. 1.5 less on pos y side. 
 //todo move JKL initials to new location of center of Qi charger
-//todo move front face plate down to sit flush on XY plane when rendering it
 
-//todo make thin pla spacers aroudn buttons and lights just a littel bit thinner, as printed they are a little higher than screen
+//todo make thin pla spacers aroudn buttons and lights just a little bit thinner, as printed they are a little higher than screen
 //todo make power button notch in case gasket. or just cut manually after printing?
-//TODO do countersunk bolts with shorter heads make buttons shorter-enough so they are not esaier to press??
+//TODO do countersunk bolts with shorter heads make buttons shorter-enough so they are now easier to press without making any direct button-code changes??
 //todo make buttons have thinner walls, so they compress easier?
 //todo make clear plastic cylinder (acrylic?) with cutout to snug against LEDs - to better transmit light upwards?
 //TODO move all user definable variables to top? or woudl that remove them from their sections?
@@ -42,6 +41,7 @@ z_exaggeration = 10; //just the distance to extend objects we subtract to make v
 //3D Print Properties
 extrusion_width_tpu_min = 0.5; //actually .45 TODO reprint buttons and top case
 extrusion_height_tpu_min = 0.2;
+gasket_layer_count = 3;
 extrusion_height = 0.2;
 
 
@@ -115,7 +115,7 @@ pcb_case_wall_offset_neg_z = 3; //distance from inside bottom of case to the bot
 // Chosen Properties of gasket between bottom and top case parts
 gasket_lip_width = extrusion_width_tpu_min; //TODO TEST PRINT this might not print well or might not be thick enough to actually align the gasket well enough, might neex *2 or 3
 gasket_lip_height = 2; //TODO Adjust (or make notch) so on/off switch doesnt hit this //TODO TEST PRINT. 2mm might work.
-gasket_case_z = 1; //effectively, how thick (z) is the gasket that gets squished between case shell halves
+gasket_case_z = extrusion_height_tpu_min*gasket_layer_count; //effectively, how thick (z) is the gasket that gets squished between case shell halves
 
 
 //
@@ -141,11 +141,10 @@ case_thickness_under_bolt_head = extrusion_height*3; //TODO test against real wo
 if (case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z < case_rounding_rad){
     assert(false, "Is the case_rounding_rad greater than the case top height?");
 }
-case_top_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
-//echo(case_top_z);
 
+//currently case wall thickness is the same for top and bottom, but keeping these seperate in case I need to change them later
+case_top_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
 case_bottom_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
-//echo(case_bottom_z);
 
 //case_neg_x_to_standoff_edge_distance = 3;
 //case_pos_x_to_standoff_edge_distance = 9; //ha wow measurements equal each other (78 outer standoffs + 9 + 3 = 90)
@@ -187,7 +186,7 @@ gasket_screen_pcb_neg_y_offset = 6;
 
 gasket_screen_visible_x = screen_x+1+1;
 gasket_screen_visible_y = screen_y+1+1;
-gasket_screen_visible_z = 1; //effectively, how thick (z) is the gasket right at edge of hole to make screen visible
+gasket_screen_visible_z = extrusion_height_tpu_min*gasket_layer_count; //effectively, how thick (z) is the gasket which is all around the edge of hole which makes the screen visible
 
 
 
@@ -341,7 +340,8 @@ translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickne
 }
 
 translate([0, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
-    translate([0,0,gasket_case_z+gasket_screen_visible_z]){
+//    translate([0,0,gasket_case_z+gasket_screen_visible_z]){
+    translate([0,0,0]){
         case_top_v2();
     }
 }
@@ -601,14 +601,14 @@ module case_top_v2() {
 
     difference(){
         //make rounded case
-        translate([0,0,-(case_rounding_rad*2)]){
-            rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_top_z+(case_rounding_rad*2)],case_rounding_rad);
+        translate([0,0,-case_rounding_rad]){
+            rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_top_z+case_rounding_rad],case_rounding_rad);
         }
 //        echo("Case is Xmm tall: ", case_top_z);
         
         //remove fake bottom half of rounded case
-        translate([0,0,-(case_rounding_rad*2)]){
-            cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_rounding_rad*2]);
+        translate([-offset_for_preview,-offset_for_preview,-(case_rounding_rad + offset_for_preview)]){
+            cube([offset_for_preview+case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness+offset_for_preview, offset_for_preview+case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness+offset_for_preview, case_rounding_rad + offset_for_preview]);
         }
         
         //move all contained so their coordinate system is as if pcb at 0,0
@@ -616,8 +616,8 @@ module case_top_v2() {
             //build part that interfaces with gasket
 //            cube([pcb_x,pcb_y,10]);
             
-            //remove pcb stuff including bolt shafts (but not heads), translate down because don't remove screen bits, this piece starts at top of gasket, which is level
-            translate([0, 0, -(gasket_case_z+gasket_screen_visible_z)]){
+            //remove pcb stuff including bolt shafts (but not heads), translate down (by amount of screen shims, thickness of gasket) because don't remove screen bits, this piece starts at top of gasket, which is level
+            translate([0, 0, -(screen_z + gasket_screen_visible_z)]){ //TODO TEST PRINT
                 pcb_top_voids(0.4,0.4,0.4,true); //this does remove button voids, but we subtract even more down lower with rounded button sheaths
             }
 
@@ -695,7 +695,7 @@ module case_top_v2() {
         
         
         } //end translate coord system
-    } //end diff
+    } //end 1st diff
     
     
     
@@ -732,11 +732,11 @@ module case_top_v2() {
 
 module case_bottom() {
     //todo make void for on/off switch, not through entire case, just enough to fit it - should be enough here iwth pcb offset, but check
-    difference(){
+    difference(){ //1st diff
         union(){
-            difference(){
+            difference(){ //2nd diff
                 //make rounded cube for outer case
-                rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_bottom_void_z + case_bottom_z + (case_rounding_rad*2)],case_rounding_rad);
+                rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_bottom_void_z + case_bottom_z + case_rounding_rad],case_rounding_rad);
                 
                 //remove material from bottom of case to show my initials 
                 //TODO move initials to mark center of qi RX loop
@@ -762,7 +762,7 @@ module case_bottom() {
             
                 //remove fake top half of rounded case, so we have a smooth top plane of case
                 translate([0,0,case_bottom_void_z + case_bottom_z]){
-                    cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_rounding_rad*2]);
+                    cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_rounding_rad + offset_for_preview]);
                 }
                 
                 //remove rounded inner void
@@ -771,7 +771,7 @@ module case_bottom() {
                 }
                 
 
-            } //end diff
+            } //end 2nd diff
             
             
             //TODO i thknk this was suppoised to be if bolt_head_material_under_bottom_case_z > 0. but we may want to repurpose this for a extra_z_under_pcb variable (so we can adjust how much extra room to have for, say, qi charger or vibration motor etc)
@@ -856,8 +856,8 @@ module case_bottom() {
             }
             
 
-        }
-    } //end difference
+        } //end translate
+    } //end 1st difference
     
     
 }
