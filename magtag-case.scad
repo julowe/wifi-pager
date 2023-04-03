@@ -4,16 +4,31 @@
 use <dotSCAD/rounded_cube.scad>;
 use <dotSCAD/rounded_square.scad>
 
+
+//
+// Variables & Info to make OpenSCAD work nicely
 rough_preview_fns = 20;
 render_fns = 60;
 
 $fn = $preview ? rough_preview_fns : render_fns;
 offset_for_preview = $preview ? 0.005 : 0;
 
+z_exaggeration = 10; //just the distance to extend objects we subtract to make vois - exaggeration so openscad preview doesn't have odd view artifacts when amount is exact to create void
+
+//
+// TODO List //
+//
 //question - make tpu gasket thick all the way aroudn oter edge of case and make top be even with gasket around screen, then print with gasket away from screen on bed, then have gasket drip down to accomodate screen height?
 
-//todo update above description of how pieces are printed and go together
+//todo update above description of how pieces are printed and go together (revising error from previous code)
 
+//todo shrink X & Y dimensions of case now that Qi charger soldered to pcb. might have to increase gap beneath pcb (Z dimension) to accomodate new qi board? (feature addition)
+// AS MEASURED, so decrease for actual changes. 3.1 mm less on neg x side. 4.74 less on neg y side. 1.75-2 on pos y side. but that is with power switch flush to case. 7.02 less on pos x side.
+// CHANGES TO MAKE: 2.5 less on neg x side. 1.5 less on pos y side. 
+//todo move JKL initials to new location of center of Qi charger
+//todo move front face plate down to sit flush on XY plane when rendering it
+
+//todo make thin pla spacers aroudn buttons and lights just a littel bit thinner, as printed they are a little higher than screen
 //todo make power button notch in case gasket. or just cut manually after printing?
 //TODO do countersunk bolts with shorter heads make buttons shorter-enough so they are not esaier to press??
 //todo make buttons have thinner walls, so they compress easier?
@@ -22,38 +37,16 @@ offset_for_preview = $preview ? 0.005 : 0;
 
 //todo set correct extrusion widths and heights for tpu??
 
+
+//
+//3D Print Properties
 extrusion_width_tpu_min = 0.5; //actually .45 TODO reprint buttons and top case
 extrusion_height_tpu_min = 0.2;
 extrusion_height = 0.2;
-pcb_x = 80;
-pcb_y = 53.5;
-pcb_z = 1.65; //caliper 1.5-1.65
-
-pcb_case_wall_offset_neg_x = 4; //distance between case wall and pcb on neg x side of case
-pcb_case_wall_offset_pos_y = 3; //distance between case wall and pcb on pos y side of case
-
-//standoff_difference_x = 72.5;
-//standoff_difference_y = 45.5;
-standoff_diameter = 5.5;
-standoff_height = 6; //from under pcb
-standoff_pcb_edge_offset = 1;
 
 
-button_x = 6.5; //6.1 measured
-button_y = 4; //3.62 measured
-button_z = 5.5; //4.36 measured, but need to account for sagging tpu. 4.5 was note enough, gap between tpu gasket and pcb measured at 1.1 mm/ 5.5 done for first tpu with rounded buttons, very hard to press down
-
-
-light_x = 4;
-light3_pos_x_edge_to_pcb_neg_x_edge = 17;
-light2_pos_x_edge_to_pcb_neg_x_edge = 33.75;
-light1_pos_x_edge_to_pcb_neg_x_edge = 50.25;
-light0_pos_x_edge_to_pcb_neg_x_edge = 66;
-
-z_exaggeration = 10;
-
-gasket_bolt_head_z = extrusion_height_tpu_min*2; //account for height of TPU gasket
-
+//
+//Physical Properties of bolts
 bolt_diam = 3.25;
 //bolt_diam_tpu = bolt_diam - 0.25 + 2.45+3; //used to show heatset insert and wall diam
 bolt_diam_tpu = bolt_diam - 0.25;
@@ -63,73 +56,32 @@ bolt_head_upper_diam = 6;
 bolt_head_height = 2; //make greater to have bolt head recessed, measured at 3-3.05 //TODO check bolt head against real world test print and i decouple gasket from bolt head correctly in code
 
 
+//
+//PCB Properties
+pcb_x = 80;
+pcb_y = 53.5;
+pcb_z = 1.65; //caliper 1.5-1.65
+//standoff_difference_x = 72.5;
+//standoff_difference_y = 45.5;
+standoff_diameter = 5.5; //of actual metal standoff that is connected to PCB
+standoff_height = 6; //from under pcb
+standoff_pcb_edge_offset = 1; //distance from edge of PCB to outer edge of standoffs - symmetric on x and y and same for all 4 standoffs
 
+button_x = 6.5; //6.1 measured
+button_y = 4; //3.62 measured
+button_z = 5.5; //4.36 measured, but need to account for sagging tpu. 4.5 was note enough, gap between tpu gasket and pcb measured at 1.1 mm/ 5.5 done for first tpu with rounded buttons, very hard to press down
 
-case_inner_x = 92; //this is a little bit of room away from screen ribbon cable and qi rx ribbon cable
-case_inner_y = 60+2; //first guess 68; //this is a little bit of room away from side of qi rx pad // 60 is actually wide enough, but looks off balance, so adding a little back jsut for top of case aesthetics
-//case_bottom_void_z = 10; //changed, define this dymaically with realwaorld dimensions of standoffs and bolt head etc
-case_wall_vertical_thickness = 2; //ugh really this shoudl be 'case_vertical_wall_thickness'
-//case_wall_top_thickness = 2; //not used
-//case_wall_bottom_thickness = 3; //not used. now using case_bottom_z
-
-case_rounding_rad = 3;
-case_thickness_under_bolt_head = extrusion_height*3; //TODO test against real worl dtest print - is this little enough since it is countersunk?
-
-if (case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z < case_rounding_rad){
-    assert(false, "Is the case_rounding_rad greater than the case top height?");
-}
-case_top_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
-echo(case_top_z);
-
-case_bottom_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
-echo(case_bottom_z);
-
-case_neg_x_to_standoff_edge_distance = 3;
-case_pos_x_to_standoff_edge_distance = 9; //ha wow measurements equal each other (78 outer standoffs + 9 + 3 = 90)
-case_neg_y_to_standoff_edge_distance = 8;
-case_pos_y_to_standoff_edge_distance = 5; // (51 + 8 + 5 = 64)
-
-case_neg_x_to_standoff_center_distance = 3+standoff_diameter/2;
-case_pos_x_to_standoff_center_distance = 9+standoff_diameter/2; //ha wow measurements equal each other (78 outer standoffs + 9 + 3 = 90)
-case_neg_y_to_standoff_center_distance = 8+standoff_diameter/2;
-case_pos_y_to_standoff_center_distance = 5+standoff_diameter/2; // (51 + 8 + 5 = 64)
-
-
+light_x = 4;
+light3_pos_x_edge_to_pcb_neg_x_edge = 17;
+light2_pos_x_edge_to_pcb_neg_x_edge = 33.75;
+light1_pos_x_edge_to_pcb_neg_x_edge = 50.25;
+light0_pos_x_edge_to_pcb_neg_x_edge = 66;
 
 screen_x = 80; //measured 81.2
 screen_x_neg_x_bump = 1.5;
 screen_y = 37; //measured 36.8
-screen_z = 1.5; //measured 1.4
-
-screen_x_visible = 68;
-screen_y_visible = 29;
-screen_z_visible = 20;
-//screen_visible_void_x_inset_from_screen_neg_x_edge = 11; //from ribbon edge
-screen_visible_void_x_inset_from_screen_neg_x_edge = 9;
-screen_visible_void_y_inset_from_screen_neg_y_edge = 4;
-screen_visible_void_z_inset_from_case_neg_z_edge = screen_z;
-
-
-//gasket info - building this up in Z layers, defining the shape and the voids of each layer
-//make two gaskets
-//one a simple ring for edge of case, two steps, bc lip to align gasket
-//second, a gasket for screen, two steps
-gasket_screen_visible_void_x = screen_x_visible;
-gasket_screen_visible_void_y = screen_y_visible;
-gasket_screen_visible_void_z = z_exaggeration; //exafferate to cut through case
-
-gasket_screen_void_x = screen_x;
-gasket_screen_void_y = screen_y;
-gasket_screen_void_z = screen_z;
-
-gasket_screen_pcb_neg_y_offset = 6;
-
-
-gasket_screen_visible_x = screen_x+1+1;
-gasket_screen_visible_y = screen_y+1+1;
-gasket_screen_visible_z = 1; //effectively, how thick (z) is the gasket right at edge of hole to make screen visible
-
-
+//screen_z = 1.5; //measured 1.4
+screen_z = 1.4; //measured 1.4 //TODO TEST PRINT
 
 //pcb_button_neg_y_offset = 2.1; //2.15 - 2.25 measured, so want a bit less to give it a margin
 pcb_button_neg_y_offset = 3.81 - 3.5/2; //eagle dimensions
@@ -146,6 +98,100 @@ button_D15_center_pcb_edge_neg_x_offset = 15.24; //eagle brd file
 button_D14_center_pcb_edge_neg_x_offset = 31.75; // eagle brd file
 button_D12_center_pcb_edge_neg_x_offset = 48.26; // eagle brd file
 button_D11_center_pcb_edge_neg_x_offset = 64.77; // eagle brd file
+
+
+//
+// Properties of buffer around PCB (due to extra bits added etc)
+//pcb_case_wall_offset_neg_x = 4; //distance between case wall and pcb on neg x side of case
+pcb_case_wall_offset_neg_x = 1.5; //distance between case wall and pcb on neg x side of case //TODO TEST PRINT
+pcb_case_wall_offset_pos_x = 1.5; //distance between case wall and pcb on pos y side of case //TODO TEST PRINT
+//pcb_case_wall_offset_pos_y = 3; //distance between case wall and pcb on pos y side of case
+pcb_case_wall_offset_neg_y = 3; //distance between case wall and pcb on pos y side of case //TODO TEST PRINT
+pcb_case_wall_offset_pos_y = 1.5; //distance between case wall and pcb on pos y side of case //TODO TEST PRINT
+pcb_case_wall_offset_neg_z = 3; //distance from inside bottom of case to the bottom of the metal standoffs which are connected to bottom of the pcb (ie extra room for qi receiver & that adhesive pad etc)
+
+
+//
+// Chosen Properties of gasket between bottom and top case parts
+gasket_lip_width = extrusion_width_tpu_min; //TODO TEST PRINT this might not print well or might not be thick enough to actually align the gasket well enough, might neex *2 or 3
+gasket_lip_height = 2; //TODO Adjust (or make notch) so on/off switch doesnt hit this //TODO TEST PRINT. 2mm might work.
+gasket_case_z = 1; //effectively, how thick (z) is the gasket that gets squished between case shell halves
+
+
+//
+// Chosen properties of case
+case_wall_vertical_thickness = 2; //ugh really this shoudl be 'case_vertical_wall_thickness'
+case_rounding_rad = 3;
+
+
+//Calculate case size
+//case_inner_x = 92-2.5; //this is a little bit of room away from screen ribbon cable and qi rx ribbon cable
+case_inner_x = pcb_case_wall_offset_neg_x + pcb_x + gasket_lip_width*2 + pcb_case_wall_offset_pos_x; //TODO TEST PRINT
+//case_inner_y = 60+2; //first guess 68; //this is a little bit of room away from side of qi rx pad // 60 is actually wide enough, but looks off balance, so adding a little back jsut for top of case aesthetics
+case_inner_y = pcb_case_wall_offset_neg_y + pcb_y + gasket_lip_width*2 + pcb_case_wall_offset_pos_y;
+//case_bottom_void_z = 10; //changed, define this dymaically with realwaorld dimensions of standoffs and bolt head etc
+
+//case_wall_top_thickness = 2; //not used
+//case_wall_bottom_thickness = 3; //not used. now using case_bottom_z
+
+gasket_bolt_head_z = extrusion_height_tpu_min*2; //account for height of TPU gasket
+
+case_thickness_under_bolt_head = extrusion_height*3; //TODO test against real world test print - is this little enough since it is countersunk?
+
+if (case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z < case_rounding_rad){
+    assert(false, "Is the case_rounding_rad greater than the case top height?");
+}
+case_top_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
+//echo(case_top_z);
+
+case_bottom_z = case_thickness_under_bolt_head+bolt_head_height+gasket_bolt_head_z;
+//echo(case_bottom_z);
+
+//case_neg_x_to_standoff_edge_distance = 3;
+//case_pos_x_to_standoff_edge_distance = 9; //ha wow measurements equal each other (78 outer standoffs + 9 + 3 = 90)
+//case_neg_y_to_standoff_edge_distance = 8;
+//case_pos_y_to_standoff_edge_distance = 5; // (51 + 8 + 5 = 64)
+//
+//case_neg_x_to_standoff_center_distance = 3+standoff_diameter/2;
+//case_pos_x_to_standoff_center_distance = 9+standoff_diameter/2; //ha wow measurements equal each other (78 outer standoffs + 9 + 3 = 90)
+//case_neg_y_to_standoff_center_distance = 8+standoff_diameter/2;
+//case_pos_y_to_standoff_center_distance = 5+standoff_diameter/2; // (51 + 8 + 5 = 64)
+
+
+
+
+
+screen_x_visible = 68;
+screen_y_visible = 29;
+screen_z_visible = 20;
+//screen_visible_void_x_inset_from_screen_neg_x_edge = 11; //from ribbon edge
+screen_visible_void_x_inset_from_screen_neg_x_edge = 9;
+screen_visible_void_y_inset_from_screen_neg_y_edge = 4;
+//screen_visible_void_z_inset_from_case_neg_z_edge = screen_z; //not used TODO delete
+
+
+//gasket info - building this up in Z layers, defining the shape and the voids of each layer
+//make two gaskets
+//one a simple ring for edge of case, two steps, bc lip to align gasket
+//second, a gasket for screen, two steps
+gasket_screen_visible_void_x = screen_x_visible;
+gasket_screen_visible_void_y = screen_y_visible;
+gasket_screen_visible_void_z = z_exaggeration; //exaggerate to cut through case
+
+gasket_screen_void_x = screen_x;
+gasket_screen_void_y = screen_y;
+gasket_screen_void_z = screen_z;
+
+gasket_screen_pcb_neg_y_offset = 6;
+
+
+gasket_screen_visible_x = screen_x+1+1;
+gasket_screen_visible_y = screen_y+1+1;
+gasket_screen_visible_z = 1; //effectively, how thick (z) is the gasket right at edge of hole to make screen visible
+
+
+
+
 
 
 gasket_individual_button_wall_x = extrusion_width_tpu_min*1.5;
@@ -169,7 +215,7 @@ gasket_button_block_y = button_y + extrusion_width_tpu_min*2;
 
 
 //gasket_button_block_z = 5.5;
-gasket_button_block_z = button_z + 0.6; //idea: 2 or 3 layers, todo put in layer height variable
+gasket_button_block_z = button_z + extrusion_height_tpu_min*3; //idea: 2 or 3 layers for button top thickness
 
 
 //about 10.3 between buttons. so say 10
@@ -181,9 +227,9 @@ gasket_void_lights_y = gasket_screen_pcb_neg_y_offset;
 gasket_void_lights_z = 3; //measured at 1.9-2.1
             
         
-gasket_case_x = case_wall_vertical_thickness + case_inner_x + case_wall_vertical_thickness;
-gasket_case_y = case_wall_vertical_thickness + case_inner_y + case_wall_vertical_thickness;
-gasket_case_z = 1; //effectively, how thick (z) is the gasket that gets squished betwen case shell halves
+gasket_case_x = case_wall_vertical_thickness*2 + case_inner_x;
+gasket_case_y = case_wall_vertical_thickness*2 + case_inner_y;
+
 
 //gasket_case_void_x = screen_x + screen_x_neg_x_bump;
 //gasket_case_void_y = 54;
@@ -192,8 +238,9 @@ gasket_case_z = 1; //effectively, how thick (z) is the gasket that gets squished
 //this is a small lip so the gasket sits nicley in case before screwing two halves together
 //gasket_lip_x = case_inner_x;
 //gasket_lip_y = case_inner_y;
-gasket_lip_width = 2;
-gasket_lip_height = 3;
+//gasket_lip_width = 2;
+
+
 gasket_case_void_x = case_inner_x - gasket_lip_width*2;
 gasket_case_void_y = case_inner_y - gasket_lip_width*2;
 gasket_case_void_z = gasket_case_z;
@@ -210,7 +257,7 @@ case_button_void_x = gasket_button_block_x + case_button_gap*2;
 case_button_void_y = gasket_button_block_y + case_button_gap*2;
                   
 
-
+//used only by old modules
 heatset_insert_diameter = 5.2;
 heatset_insert_height = 5;
 
@@ -222,28 +269,36 @@ heatset_insert_height = 5;
 //echo(0.2*3 - (3-2-0.4));
 
 air_gap_between_standoff_and_material_under_bolt_head = 1; //TODO, do i want an air gap, or do i want it flush to be more sturdy and just make a column if need to bridge diff?? //AKA how much extra room do i want under pcb standoffs?? not really.
+//TODO CHANGE, i think i'd rather have a support column printed so the bolt tighens pla against the pcb's metal standoff - so not hav an airgap. use pcb_case_wall_offset_neg_z instead
 
-case_bottom_void_z = air_gap_between_standoff_and_material_under_bolt_head + standoff_height + pcb_z + screen_z + gasket_screen_visible_z - gasket_case_z;
-echo(case_bottom_void_z);
+case_bottom_void_z = pcb_case_wall_offset_neg_z + standoff_height + pcb_z + screen_z + gasket_screen_visible_z - gasket_case_z;
+//echo(case_bottom_void_z);
 
 //case gasekt - (screen gasket + pcb height) 
 //standoff_height;
 //bolt_head_material_under_bottom_case_z = case_bottom_void_z + case_wall_bottom_thickness - bolt_head_height - standoff_height - 1; //qmm clearance between standoff and this cylinder, so can squish gasket
 //echo("There is ", bolt_head_material_under_bottom_case_z, " mm material under the bolt on bottom of casem plus 1mm of air to standoff");
-bolt_head_material_around_diam = bolt_head_diam + 2*2;
+bolt_head_material_around_diam = bolt_head_diam + 1*2;
 
 
 gasket_individual_button_wall_z = (case_top_z) - (button_z - (screen_z+gasket_screen_visible_z)) + 1;
-            echo(gasket_individual_button_wall_z);
+//            echo(gasket_individual_button_wall_z);
             
 gasket_individual_button_rounding_rad = 1;
             
 gasket_individual_button_z = case_top_z + gasket_individual_button_rounding_rad; //last term is how tall above case to make button stick out (suggest it be equal to or greater than rounding rad, otherwise button will besmaller than hole at top of case). if you change this term also need to make sure term in button_sheath module doesn't screw up the join of sheath to gasket
-            
-            
+
+
+
 button_to_tpu_gap = 0.2;
-            
-            
+
+
+echo("");
+echo("   --- Dimensions of Object ---   ");
+echo("Wall of case bottom has thickness of:", case_bottom_z);
+echo("Case bottom has inner void height of:", case_bottom_void_z);
+echo("Case top has total height of:", case_top_z);
+
 
 /*************************************
 //                                  //
@@ -253,8 +308,9 @@ button_to_tpu_gap = 0.2;
 //                                  //
 *************************************/
 //
- 
 
+
+// Gaskets
 translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, 0, 0]){
     gasket_case();
     
@@ -276,9 +332,10 @@ translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickne
     }
 }
 
+
 // render plastic shims that go around screen to create even plane wiht top of e-ink screen
 translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)+15, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)+15, 0]){
-    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){ //align coords to align gasket and case top
+    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + pcb_case_wall_offset_neg_y, 0]){ //align coords to align gasket and case top
         gasket_screen_v3("shims");
     }
 }
@@ -547,7 +604,7 @@ module case_top_v2() {
         translate([0,0,-(case_rounding_rad*2)]){
             rounded_cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_top_z+(case_rounding_rad*2)],case_rounding_rad);
         }
-        echo("Case is Xmm tall: ", case_top_z);
+//        echo("Case is Xmm tall: ", case_top_z);
         
         //remove fake bottom half of rounded case
         translate([0,0,-(case_rounding_rad*2)]){
@@ -555,7 +612,7 @@ module case_top_v2() {
         }
         
         //move all contained so their coordinate system is as if pcb at 0,0
-        translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){
+        translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + pcb_case_wall_offset_neg_y, 0]){
             //build part that interfaces with gasket
 //            cube([pcb_x,pcb_y,10]);
             
@@ -644,7 +701,7 @@ module case_top_v2() {
     
     //todo do this directly with button positions and rounded cubes if i go that way, but then also place tpu buttons directly, not a long block with chunks taken out.
     //move all contained so their coordinate system is as if pcb at 0,0
-    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){
+    translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + pcb_case_wall_offset_neg_y, 0]){
         //add area between buttons
 //        translate([(button_D15_center_pcb_edge_neg_x_offset+button_D14_center_pcb_edge_neg_x_offset)/2 - (button_button_void_x)/2+case_button_gap, gasket_button_block_neg_y_offset-case_button_gap, 0]){
 //            cube([button_button_void_x-case_button_gap*2, case_button_void_y, case_thickness_under_bolt_head+bolt_head_height]);
@@ -718,33 +775,37 @@ module case_bottom() {
             
             
             //TODO i thknk this was suppoised to be if bolt_head_material_under_bottom_case_z > 0. but we may want to repurpose this for a extra_z_under_pcb variable (so we can adjust how much extra room to have for, say, qi charger or vibration motor etc)
+            
 //            if (case_wall_bottom_thickness > 0) {
-//                //add plastic cylinders to hold bolt against case bottom
-//                translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), case_bottom_z]){
-//                    //neg x neg y
-//                    translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-//                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
-//                    }
-//                    //pos x neg y
-//                    translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
-//                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
-//                    }
-//                    //pos x pos y
-//                    translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-//                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
-//                    }
-//                    //neg x pos y
-//                    translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
-//                        cylinder(bolt_head_extra_material_under_bottom_case_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
-//                    }
-//                }//end translate cylinder add on material
-//            } //end if
+            
+            
+            //add plastic cylinders (support columns) so pla sits flush with PCB's metal standoffs when extra room under COTS PCB is needed.
+            if (pcb_case_wall_offset_neg_z > 0) {
+                translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + pcb_case_wall_offset_neg_y, case_bottom_z]){
+                    //neg x neg y
+                    translate([standoff_pcb_edge_offset + standoff_diameter/2, standoff_pcb_edge_offset + standoff_diameter/2, 0]){
+                        cylinder(pcb_case_wall_offset_neg_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
+                    }
+                    //pos x neg y
+                    translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), standoff_pcb_edge_offset + standoff_diameter/2, 0]){
+                        cylinder(pcb_case_wall_offset_neg_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
+                    }
+                    //pos x pos y
+                    translate([pcb_x - (standoff_pcb_edge_offset + standoff_diameter/2), pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
+                        cylinder(pcb_case_wall_offset_neg_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
+                    }
+                    //neg x pos y
+                    translate([standoff_pcb_edge_offset + standoff_diameter/2, pcb_y - (standoff_pcb_edge_offset + standoff_diameter/2), 0]){
+                        cylinder(pcb_case_wall_offset_neg_z, bolt_head_material_around_diam/2, bolt_head_material_around_diam/2);
+                    }
+                }//end translate cylinder add on material
+            } //end if
 
 
         }//end union
         
         //move coordinates to align holes & standoffs
-        translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + (case_inner_y - pcb_y - pcb_case_wall_offset_pos_y), 0]){
+        translate([case_wall_vertical_thickness+pcb_case_wall_offset_neg_x, case_wall_vertical_thickness + pcb_case_wall_offset_neg_y, 0]){
 
             //remove area for countersunk bolt heads
             //neg x neg y
