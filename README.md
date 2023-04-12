@@ -39,11 +39,14 @@ NB: Objects in the lower right are to be printed out of TPU or some other flexib
 I plan to skip v1.0 because a true 1.0 would require me to reprint the bullky case that can fit the old (larger) Qi charger, and I don't want to do that. So leaving v0.9 to reflect that it might not be production ready. v2 will be with directly soldered qi and thus smaller case, so will not be compatible with previous.
 
 ### v2.0
-- [ ] How thin can i print TPU gaskets? Would just one layer be smoother? Or make channel for unprinted TPU filament/O-ring?
+- [x] How thin can i print TPU gaskets? Would just one layer be smoother? Or make channel for unprinted TPU filament/O-ring? (Printed two layer washers and those were fine. But printed 0.8mm? gaskets and they don't have us much squish to make a nice seall against uneven bowing of case top against bottom case or inner screen/pcb. prob need to fix case a little, but also maybe thicket gaskets too?)
 - [x] Solder Qi receiver directly to PCB
 - [x] add some hot glue strain relief to Qi board <-> wires & wires <-> PCB
-- [ ] document soldering Qi receiver directly to PCB
-- [ ] shrink case dimensions now that Qi receiver is smaller and no USB-C sticking out 
+- [ ] document soldering Qi receiver directly to PCB - pictures taken, need to writ eup
+- [ ] shrink case dimensions now that Qi receiver is smaller and no USB-C sticking out - printed well, just need to doublecheck code and do some comment cleanup in scad file
 
 ### v2.1
 - [ ] think about adding vibration motor - space in case for motor, but also what pins to attach it to
+- [ ] Case top bows up in middle a little, try moving screw holes out a very small amount
+- [ ] Add inset of lighting/charging icon on the inner wall of bottom case near the charging LED? might be overshadwoed by power LED, but could be neat indicator of charging status
+- [ ] Move logo on case bottom to match up with qi rx location
