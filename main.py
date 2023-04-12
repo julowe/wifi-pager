@@ -166,8 +166,14 @@ try:
     print("My IP address is", wifi.radio.ipv4_address)
     socket = socketpool.SocketPool(wifi.radio)
     https = requests.Session(socket, ssl.create_default_context())
-except Exception:  # pylint: disable=broad-except
+except Exception as errorMessage:  # pylint: disable=broad-except
     print("Could not connect to wifi. Trying again in 60 seconds.")
+    print(errorMessage)
+    # add check to see which error and then yes/no scan for networks?
+    print("Available WiFi networks:")
+    for network in wifi.radio.start_scanning_networks():
+        print("\t%s\t\tRSSI: %d\tChannel: %d" % (str(network.ssid, "utf-8"),network.rssi, network.channel))
+        wifi.radio.stop_scanning_networks()
     magtag.exit_and_deep_sleep(60)
 
 #print("end wifi", time.monotonic())
@@ -186,13 +192,17 @@ list_alert_silence_minutes = [5, 10, 30, 99]
 # Get alarm statuses from Grafana
 
 # URL = "http://shiphouse.nautilus.oet.org/graphs/api/alerts/6"
-URL = "http://shiphouse.nautilus.oet.org/graphs/api/alerts/"
-#print(URL)
+# URL = "http://shiphouse.nautilus.oet.org/graphs/api/alerts/"
+
+print(secrets["URL"])
 
 # turn lights off from bootup
 magtag.peripherals.neopixel_disable = True
 
-with https.get(URL) as response:
+# try to ping server here to see if reachable
+# to avoid/inform about -2 error below when can;t reach server
+
+with https.get(secrets["URL"]) as response:
     try:
         R_JSON = response.json()
     except Exception:  # pylint: disable=broad-except
@@ -293,9 +303,10 @@ print(time_now_string)
 
 #print("end ntp get", time.monotonic())
 
+# somewhere above her, start collecting errors and if any print them to screen
+
+
 # Construct text to display on e-ink
-
-
 text_ok = ", ".join(list_ok)
 text_pending = ", ".join(list_pending)
 text_nodata = ", ".join(list_nodata)
