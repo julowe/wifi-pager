@@ -9,6 +9,7 @@
 # [] do diff sleep when connected to computer
 # [] Move main text down a little off of status text
 # [] try more than one ssid
+# [] remove alert from end of json name?
 
 # example data from grafana v1 dashboard
 # {'evalData': {}, 'dashboardUid': 'n5qH1pcWk', 'url': '/graphs/d/n5qH1pcWk/temp-humidity', 'evalDate': '0001-01-01T00:00:00Z', 'id': 5, 'dashboardSlug': 'temp-humidity', 'state': 'ok', 'name': 'Rack Room alert', 'dashboardId': 1, 'executionError': '', 'panelId': 12, 'newStateDate': '2022-09-23T10:11:16Z'}
@@ -359,7 +360,7 @@ if list_ok and not ok_concise:
     display_text_list.append(text_ok)
 
 
-if not list_alerting and not list_pending and ok_concise:
+if not list_alerting and not list_pending and not list_nodata and ok_concise:
     display_text = "All Ok  :-)"
 else:
     display_text = "\n".join(display_text_list)
@@ -372,7 +373,7 @@ print(display_text)
 magtag.add_text(
     text_font="fonts/Arial-Bold-12.pcf",
     text_wrap=36,
-    text_position=(8, 6),
+    text_position=(8, 10), # (in from left, down from top)
     text_scale=1,
     line_spacing=0.7,
     text_anchor_point=(0, 0),
