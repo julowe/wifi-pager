@@ -6,6 +6,9 @@
 # [] Look at neopixel color cycling (to show it is charging)
 # [x] get ntp time
 # [] quiet hours? prob not, more alert severity filtering better
+# [] do diff sleep when connected to computer
+# [] Move main text down a little off of status text
+# [] try more than one ssid
 
 # example data from grafana v1 dashboard
 # {'evalData': {}, 'dashboardUid': 'n5qH1pcWk', 'url': '/graphs/d/n5qH1pcWk/temp-humidity', 'evalDate': '0001-01-01T00:00:00Z', 'id': 5, 'dashboardSlug': 'temp-humidity', 'state': 'ok', 'name': 'Rack Room alert', 'dashboardId': 1, 'executionError': '', 'panelId': 12, 'newStateDate': '2022-09-23T10:11:16Z'}
