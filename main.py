@@ -10,6 +10,8 @@
 # [] Move main text down a little off of status text
 # [] try more than one ssid
 # [] remove alert from end of json name?
+# [] add low battery warning
+# [] refresh e-ink display every hour? (i.e. 0 < ntp_minute < 5)
 
 # example data from grafana v1 dashboard
 # {'evalData': {}, 'dashboardUid': 'n5qH1pcWk', 'url': '/graphs/d/n5qH1pcWk/temp-humidity', 'evalDate': '0001-01-01T00:00:00Z', 'id': 5, 'dashboardSlug': 'temp-humidity', 'state': 'ok', 'name': 'Rack Room alert', 'dashboardId': 1, 'executionError': '', 'panelId': 12, 'newStateDate': '2022-09-23T10:11:16Z'}
