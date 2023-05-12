@@ -5,10 +5,8 @@
 # # TODO:
 # [] Look at neopixel color cycling (to show it is charging)
 # [] quiet hours? prob not, more alert severity filtering better
-# [] do diff sleep when connected to computer
-# [] Move main text down a little off of status text
+# [] do diff sleep when connected to computer?
 # [] remove "alert" from end of json name?
-# [] add low battery warning
 
 # example data from grafana v1 dashboard
 # {'evalData': {}, 'dashboardUid': 'n5qH1pcWk', 'url': '/graphs/d/n5qH1pcWk/temp-humidity', 'evalDate': '0001-01-01T00:00:00Z', 'id': 5, 'dashboardSlug': 'temp-humidity', 'state': 'ok', 'name': 'Rack Room alert', 'dashboardId': 1, 'executionError': '', 'panelId': 12, 'newStateDate': '2022-09-23T10:11:16Z'}
@@ -499,8 +497,14 @@ else:
         # Note what screen/menu we are on
         screen_name = "main"
 
+        if magtag.peripherals.battery < 3.5:
+            battery_display_string = "!!BATTERY LOW!! at"
+        else:
+            battery_display_string = "battery:"
+
+        
         # Display updated time
-        magtag.set_text(time_now_string + ", battery: {0:.2f}V".format(magtag.peripherals.battery), 3, False)
+        magtag.set_text(time_now_string + ", " + battery_display_string + " {0:.2f}V".format(magtag.peripherals.battery), 3, False)
 
         # Display wake device text
         if all_ok:
