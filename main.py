@@ -62,7 +62,6 @@ else:
         alarm.sleep_memory[1] = 0
         print("Resetting sleep_memory[1] (alarm_silence_time) to 0")
 
-#print("end sleep mem", time.monotonic())
 
 ## Get wifi details and more from a secrets.py file
 try:
@@ -70,7 +69,6 @@ try:
 except ImportError:
     print("WiFi secrets are kept in secrets.py, please add them there!")
     raise
-#print("wifi", time.monotonic())
 
 ## TODO delete or fix for v8
 def font_width_to_dict(font):
@@ -130,7 +128,6 @@ def wrap(text, max_width, max_lines, font):
 button_colors = ((255, 0, 0), (255, 150, 0), (0, 255, 255), (180, 0, 255))
 button_tones = (1047, 1318, 1568, 2093)
 
-#print("startmag", time.monotonic())
 
 ## Initialize magtag object
 magtag = MagTag()
@@ -147,18 +144,15 @@ if alarm_wake == "button":
 
 magtag.set_background("bmps/jkl-initials.bmp")
 
-#print("end mag", time.monotonic())
 
 ## get all_ok value from sleep_memory and save locally
 all_ok_previous = alarm.sleep_memory[0]
 ## get alarm_silence_time value from sleep_memory and save locally
 alarm_silence_time = alarm.sleep_memory[1]
 
-#print("end read sleep", time.monotonic())
 
 ## Set up text fields for magtag
 
-#print("start addtext", time.monotonic())
 ## text 0 - main alarm status display - average size text for when alerts are firing
 magtag.add_text(
     text_font="fonts/Arial-Bold-12.pcf",
@@ -273,8 +267,6 @@ if not wifi_connected:
     magtag.exit_and_deep_sleep(wifi_sleep_seconds_retry)
 
 
-#print("end wifi", time.monotonic())
-
 ok_concise = True
 alert_initial_tone = False
 alerting_user = False
@@ -351,7 +343,6 @@ except Exception:  # pylint: disable=broad-except
     print("Could not get url. Trying again in 60 seconds.")
     magtag.exit_and_deep_sleep(60)
 
-#print("end json parse", time.monotonic())
 
 ## update debugging boolean!
 debug_bool = False
@@ -389,7 +380,6 @@ except Exception as errorMessage:  # pylint: disable=broad-except
 
 print(time_now_string)
 
-#print("end ntp get", time.monotonic())
 
 ## somewhere above here, start collecting errors and if any print them to screen
 
@@ -452,7 +442,6 @@ else:
 
 print(display_text)
 
-#print("end addt ext", time.monotonic())
 
 ## Prepare to wrap the text correctly by getting the width of each character for every font
 #arial_12 = font_width_to_dict("fonts/Arial-Bold-12.bdf")
@@ -514,7 +503,6 @@ else:
         else:
             magtag.set_text(display_text, 0)
 
-        #print("end screen", time.monotonic())
 
     except Exception:  # pylint: disable=broad-except
         print("Could not update display.")
