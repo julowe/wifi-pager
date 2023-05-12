@@ -164,23 +164,41 @@ alarm_silence_time = alarm.sleep_memory[1]
 
 #print("end read sleep", time.monotonic())
 
+refresh_interval_mins_ok = 5
+refresh_interval_mins_alerting = 1
+alert = "noise"
+
+data_url = ""
+wifi_connected = False
 # Set up WiFi
-try:
-    print("connecting to", secrets["ssid"])
-    wifi.radio.connect(secrets["ssid"], secrets["password"])
-    print(f"Connected to {secrets['ssid']}!")
-    print("My IP address is", wifi.radio.ipv4_address)
-    socket = socketpool.SocketPool(wifi.radio)
-    https = requests.Session(socket, ssl.create_default_context())
-except Exception as errorMessage:  # pylint: disable=broad-except
-    print("Could not connect to wifi. Trying again in 60 seconds.")
-    print(errorMessage)
-    # add check to see which error and then yes/no scan for networks?
+for location in secrets:
+    try:
+        print("connecting to", location["ssid"])
+        wifi.radio.connect(location["ssid"], location["password"])
+        print(f"Connected to {location['ssid']}!")
+        print("My IP address is", wifi.radio.ipv4_address)
+        socket = socketpool.SocketPool(wifi.radio)
+        https = requests.Session(socket, ssl.create_default_context())
+    except Exception as errorMessage:  # pylint: disable=broad-except
+        print("Could not connect to wifi ssid:", location["ssid"], "at", location["name"])
+        print(errorMessage)
+        # TODO add check to see which error?
+    else:
+        data_url = location["URL"]
+        wifi_connected = True
+        refresh_interval_mins_ok = location["refresh_interval"]
+        if location["alert_default"] == "mute" and alarm_triggered is None: #i.e. mute alarm by default and this is the first time code was run:
+            alarm_silence_time = 99 # 99 is a stand-in for 'indefinitely'
+
+wifi_sleep_seconds_retry = 60
+if not wifi_connected:
+    print("Failed to connect to wifi, sleeping for", wifi_sleep_seconds_retry, "seconds.")
     print("Available WiFi networks:")
     for network in wifi.radio.start_scanning_networks():
         print("\t%s\t\tRSSI: %d\tChannel: %d" % (str(network.ssid, "utf-8"),network.rssi, network.channel))
         wifi.radio.stop_scanning_networks()
-    magtag.exit_and_deep_sleep(60)
+    magtag.exit_and_deep_sleep(wifi_sleep_seconds_retry)
+
 
 #print("end wifi", time.monotonic())
 
@@ -200,7 +218,7 @@ list_alert_silence_minutes = [5, 10, 30, 99]
 # URL = "http://shiphouse.nautilus.oet.org/graphs/api/alerts/6"
 # URL = "http://shiphouse.nautilus.oet.org/graphs/api/alerts/"
 
-print(secrets["URL"])
+print(data_url)
 
 # turn lights off from bootup
 magtag.peripherals.neopixel_disable = True
@@ -209,7 +227,7 @@ magtag.peripherals.neopixel_disable = True
 # to avoid/inform about -2 error below when can;t reach server
 
 try:
-	with https.get(secrets["URL"]) as response:
+	with https.get(data_url) as response:
 	    try:
 	        R_JSON = response.json()
 	    except Exception:  # pylint: disable=broad-except
@@ -304,9 +322,10 @@ else:
         #print(ntp.datetime)
 
         time_now_string = "Updated at: {:d}-{:02d}-{:02d} {:02d}:{:02d}Z".format(ntp.datetime.tm_year, ntp.datetime.tm_mon, ntp.datetime.tm_mday, ntp.datetime.tm_hour, ntp.datetime.tm_min)
-    except Exception:  # pylint: disable=broad-except
+    except Exception as errorMessage:  # pylint: disable=broad-except
         #print("Could not get NTP time. Ignoring")
         time_now_string = "Unable to get NTP time"
+        print(errorMessage)
         #magtag.exit_and_deep_sleep(60)
 
 print(time_now_string)
@@ -460,13 +479,13 @@ magtag.add_text(
 ## if active alert, yell for UI_wait_minutes and then sleep for shorter time than if no alert
 if alerting_user:
     UI_wait_minutes = 1
-    deep_sleep_minutes = 1
+    deep_sleep_minutes = refresh_interval_mins_alerting
 elif alarm_wake == "timer":
     UI_wait_minutes = 0.1 # do we even want any wait time if this thing just wakes on interval?
-    deep_sleep_minutes = 5
+    deep_sleep_minutes = refresh_interval_mins_ok
 else:
     UI_wait_minutes = 1
-    deep_sleep_minutes = 5
+    deep_sleep_minutes = refresh_interval_mins_ok
 
 ## Check status and alarm if needed, or just always refresh screen?
 # TODO also update screen every... hour?
