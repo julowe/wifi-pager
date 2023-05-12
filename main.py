@@ -227,65 +227,59 @@ magtag.peripherals.neopixel_disable = True
 # to avoid/inform about -2 error below when can;t reach server
 
 try:
-	with https.get(data_url) as response:
-	    try:
-	        R_JSON = response.json()
-	    except Exception:  # pylint: disable=broad-except
-	        print("Could not parse json. Trying again in 60 seconds.")
-	        magtag.exit_and_deep_sleep(60)
-	
-	#    print(R_JSON["Id"])
-	#    print(R_JSON)
-	#    print(len(R_JSON))
-	#     total = int(R_JSON["total"])
-	#     print(f"{total} Projects")
-	
-	    for i in R_JSON:
-	        # save quick state in array to display values of alerts (when alerting or not)? or just parse json each time?? TODO
-	        if i["state"] == "ok":
-	            #print(i["name"], "is ok")
-	            #display_text += str(i["name"]) + " is ok\n"
-	            list_ok.append(str(i["name"]))
-	
-	        elif i["state"] == "pending":
-	            all_ok = False
-	            #print(i["name"], "is", i["state"])
-	            #display_text += str(i["name"]) + " is pending\n"
-	            list_pending.append(str(i["name"]))
-	
-	            if alert_initial_tone:
-	                magtag.peripherals.play_tone(button_tones[0], 0.25)
-	
-	        elif i["state"] == "no_data":
-	            all_ok = False
-	            #print(i["name"], "is", i["state"])
-	            #display_text += str(i["name"]) + " is pending\n"
-	            list_nodata.append(str(i["name"]))
-	
-	            if alert_initial_tone:
-	                magtag.peripherals.play_tone(button_tones[0], 0.25)
-	
-	        # TODO any other status we want to break out?
-	        else:
-	            all_ok = False
-	            #print(i["name"], "is", i["state"])
-	            #display_text += str(i["name"]) + " is " + str(i["state"]) + "\n"
-	            alerting_user = True
-	            list_alerting.append(str(i["name"]))
-	
-	            # turn on lights if error and leave on
-	            magtag.peripherals.neopixel_disable = False
-	            magtag.peripherals.neopixels.fill(button_colors[3])
-	
-	            if alert_initial_tone:
-	                magtag.peripherals.play_tone(button_tones[3], 0.25)
-	            # teal (0, 255, 255)
-	            # purple (180, 0, 255)
-	
-	    # clean up JSON stuff, so save anything you want!
-	    R_JSON.clear()
-	    R_JSON = None
-	    gc.collect()
+    with https.get(data_url) as response:
+        try:
+            R_JSON = response.json()
+        except Exception:  # pylint: disable=broad-except
+            print("Could not parse json. Trying again in 60 seconds.")
+            magtag.exit_and_deep_sleep(60)
+
+        for i in R_JSON:
+            # save quick state in array to display values of alerts (when alerting or not)? or just parse json each time?? TODO
+            if i["state"] == "ok":
+                #print(i["name"], "is ok")
+                #display_text += str(i["name"]) + " is ok\n"
+                list_ok.append(str(i["name"]))
+        
+            elif i["state"] == "pending":
+                all_ok = False
+                #print(i["name"], "is", i["state"])
+                #display_text += str(i["name"]) + " is pending\n"
+                list_pending.append(str(i["name"]))
+
+                if alert_initial_tone:
+                    magtag.peripherals.play_tone(button_tones[0], 0.25)
+
+            elif i["state"] == "no_data":
+                all_ok = False
+                #print(i["name"], "is", i["state"])
+                #display_text += str(i["name"]) + " is pending\n"
+                list_nodata.append(str(i["name"]))
+
+                if alert_initial_tone:
+                    magtag.peripherals.play_tone(button_tones[0], 0.25)
+
+            # TODO any other status we want to break out?
+            else:
+                all_ok = False
+                #print(i["name"], "is", i["state"])
+                #display_text += str(i["name"]) + " is " + str(i["state"]) + "\n"
+                alerting_user = True
+                list_alerting.append(str(i["name"]))
+
+                # turn on lights if error and leave on
+                magtag.peripherals.neopixel_disable = False
+                magtag.peripherals.neopixels.fill(button_colors[3])
+
+                if alert_initial_tone:
+                    magtag.peripherals.play_tone(button_tones[3], 0.25)
+                # teal (0, 255, 255)
+                # purple (180, 0, 255)
+
+        # clean up JSON stuff, so save anything you want!
+        R_JSON.clear()
+        R_JSON = None
+        gc.collect()
 except Exception:  # pylint: disable=broad-except
     print("Could not get url. Trying again in 60 seconds.")
     magtag.exit_and_deep_sleep(60)
