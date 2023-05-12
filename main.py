@@ -297,7 +297,10 @@ if debug_bool:
 ## if nothing alerting, reset alarm silence time
 ## this also functions such that silence 'for duration' silences all alarms (current and new ones) until all alerts are back to ok
 if all_ok:
-    alarm_silence_time = 0
+    if location["alert_default"] == "mute":
+        alarm_silence_time = 99
+    else:
+        alarm_silence_time = 0
 
 
 if all_ok_previous and all_ok and alarm_wake == "timer":
