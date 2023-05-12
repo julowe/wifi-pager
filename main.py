@@ -461,7 +461,7 @@ else:
 
 ## Check status and alarm if needed
 ## refresh screen once an hour, during the first refresh interval
-if all_ok_previous and all_ok and alarm_wake == "timer" and time_now_min <= refresh_interval_mins_ok:
+if all_ok_previous and all_ok and alarm_wake == "timer" and time_now_min >= refresh_interval_mins_ok:
     print("Not updating e-ink display, previous status and current status is 'all ok' and this isn't the first refresh of the hour (or I can't get time)")
     screen_name = "main"
 else:
