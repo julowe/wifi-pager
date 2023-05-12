@@ -457,9 +457,7 @@ magtag.add_text(
 #arial_9 = font_width_to_dict("fonts/ArialMT-9.bdf")
 
 
-# TODO set differnt time sif wake from timer or wake from interrupt button (short fot timer, long if interrupt)
-
-# if active alert, yell for UI_wait_minutes and then sleep for shorter time than if no alert
+## if active alert, yell for UI_wait_minutes and then sleep for shorter time than if no alert
 if alerting_user:
     UI_wait_minutes = 1
     deep_sleep_minutes = 1
@@ -470,12 +468,11 @@ else:
     UI_wait_minutes = 1
     deep_sleep_minutes = 5
 
-# Check status and alarm if needed, or just always refresh screen?
-# TODO only update screen on status change
+## Check status and alarm if needed, or just always refresh screen?
+# TODO also update screen every... hour?
 
 # alarm_triggered
 #print("startscreen", time.monotonic())
-#TODO move updated time and battery to top of screen (clear up area for button text)
 if all_ok_previous and all_ok and alarm_wake == "timer":
     print("Not updating e-ink display, previous status and current status is 'all ok'")
     screen_name = "main"
@@ -520,7 +517,7 @@ else:
 
     print("e-ink display updated, waiting", UI_wait_minutes, "minutes for button presses before sleeping")
 
-# https://docs.circuitpython.org/projects/magtag/en/latest/api.html#adafruit-magtag-peripherals
+## https://docs.circuitpython.org/projects/magtag/en/latest/api.html#adafruit-magtag-peripherals
 
 
     # TODO what do we want menu to do?
@@ -695,7 +692,7 @@ if alarm_silence_time > 0:
 # release buttons
 magtag.peripherals.deinit()
 
-# wake up after 5 minutes to check status
+# wake up after deep_sleep_minutes minutes to check status
 time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 60*deep_sleep_minutes)
 
 # wake up on button press - always refresh?
