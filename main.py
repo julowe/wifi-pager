@@ -163,12 +163,91 @@ alarm_silence_time = alarm.sleep_memory[1]
 
 #print("end read sleep", time.monotonic())
 
+## Set up text fields for magtag
+
+#print("start addtext", time.monotonic())
+## text 0 - main alarm status display - average size text for when alerts are firing
+magtag.add_text(
+    text_font="fonts/Arial-Bold-12.pcf",
+    text_wrap=36,
+    text_position=(8, 10), # (in from left, down from top)
+    text_scale=1,
+    line_spacing=0.7,
+    text_anchor_point=(0, 0),
+)
+
+## text 1 - big 'all ok' status text
+magtag.add_text(
+    #text_font="/fonts/Arial-Bold-12.bdf",
+    #text_font="fonts/SourceSerifPro-Bold-AllOk-25.pcf",
+    text_font="fonts/SourceSerifPro-Bold-AllOk-38.pcf",
+    text_wrap=36,
+    #text_maxlen=120,
+    text_position=(
+        (magtag.graphics.display.width // 2),
+        (magtag.graphics.display.height // 2) - 10,
+    ),
+    line_spacing=0.75,
+    text_scale=1,
+    text_anchor_point=(0.5, 0.5),  # center the text on x & y
+)
+
+
+# magtag.add_text(
+#     text_font="fonts/Arial-Bold-12.bdf",
+#     text_position=(5, 25),
+#     text_scale=1,
+#     line_spacing=0.7,
+#     text_anchor_point=(0, 0),
+# )
+
+## text 2 - small status text in top left corner, down one line
+magtag.add_text(
+    text_font="fonts/ArialMT-9.pcf",
+    text_position=(7, 18),
+    text_scale=1,
+    text_wrap=65,
+    line_spacing=0.8,
+    text_anchor_point=(0, 0),
+)
+
+## text 3 - time & battery status bar
+magtag.add_text(
+    text_font="fonts/ArialMT-9.pcf",
+    text_scale=1,
+    text_maxlen=300,
+    #text_position=(5, 120),
+    text_position=(4, 4),
+    text_anchor_point=(0, 0),
+)
+
+## text 4 - button text
+magtag.add_text(
+    text_font="fonts/ArialMT-9.pcf",
+    text_scale=1,
+    #text_wrap=25,
+    #text_maxlen=300,
+    #text_position=(215, 120),
+    text_position=(5, 118),
+    text_anchor_point=(0, 0),
+)
+
+## text 5 - silence alarm menu
+magtag.add_text(
+    text_font="fonts/Arial-Bold-12.pcf",
+    text_position=(8, 80),
+    text_scale=1,
+    line_spacing=0.7,
+    text_anchor_point=(0, 0),
+)
+
 refresh_interval_mins_ok = 5
 refresh_interval_mins_alerting = 1
 alert = "noise"
 
 data_url = ""
 wifi_connected = False
+attempted_ssids = ""
 ## Set up WiFi
 for location in secrets:
     try:
@@ -181,6 +260,7 @@ for location in secrets:
     except Exception as errorMessage:  # pylint: disable=broad-except
         print("Could not connect to wifi ssid:", location["ssid"], "at", location["name"])
         print(errorMessage)
+        attempted_ssids += location["ssid"] + " "
         # TODO add check to see which error?
     else:
         data_url = location["URL"]
@@ -191,7 +271,8 @@ for location in secrets:
 
 wifi_sleep_seconds_retry = 60
 if not wifi_connected:
-    print("Failed to connect to wifi, sleeping for", wifi_sleep_seconds_retry, "seconds.")
+    print("Failed to connect to SSIDs", attempted_ssids, ", sleeping for", wifi_sleep_seconds_retry, "seconds.")
+    magtag.set_text("Can't connect to " + attempted_ssids + "!", 0)
     print("Available WiFi networks:")
     for network in wifi.radio.start_scanning_networks():
         print("\t%s\t\tRSSI: %d\tChannel: %d" % (str(network.ssid, "utf-8"),network.rssi, network.channel))
@@ -387,82 +468,6 @@ else:
 
 
 print(display_text)
-
-#print("start addtext", time.monotonic())
-## text 0 - main alarm status display - bigger text for when alerts are firing
-magtag.add_text(
-    text_font="fonts/Arial-Bold-12.pcf",
-    text_wrap=36,
-    text_position=(8, 10), # (in from left, down from top)
-    text_scale=1,
-    line_spacing=0.7,
-    text_anchor_point=(0, 0),
-)
-
-## text 1 - big 'all ok' status text
-magtag.add_text(
-    #text_font="/fonts/Arial-Bold-12.bdf",
-    #text_font="fonts/SourceSerifPro-Bold-AllOk-25.pcf",
-    text_font="fonts/SourceSerifPro-Bold-AllOk-38.pcf",
-    text_wrap=36,
-    #text_maxlen=120,
-    text_position=(
-        (magtag.graphics.display.width // 2),
-        (magtag.graphics.display.height // 2) - 10,
-    ),
-    line_spacing=0.75,
-    text_scale=1,
-    text_anchor_point=(0.5, 0.5),  # center the text on x & y
-)
-
-
-# magtag.add_text(
-#     text_font="fonts/Arial-Bold-12.bdf",
-#     text_position=(5, 25),
-#     text_scale=1,
-#     line_spacing=0.7,
-#     text_anchor_point=(0, 0),
-# )
-
-## text 2 - small status text in top left corner, down one line
-magtag.add_text(
-    text_font="fonts/ArialMT-9.pcf",
-    text_position=(7, 18),
-    text_scale=1,
-    text_wrap=65,
-    line_spacing=0.8,
-    text_anchor_point=(0, 0),
-)
-
-## text 3 - time & battery status bar
-magtag.add_text(
-    text_font="fonts/ArialMT-9.pcf",
-    text_scale=1,
-    text_maxlen=300,
-    #text_position=(5, 120),
-    text_position=(4, 4),
-    text_anchor_point=(0, 0),
-)
-
-## text 4 - button text
-magtag.add_text(
-    text_font="fonts/ArialMT-9.pcf",
-    text_scale=1,
-    #text_wrap=25,
-    #text_maxlen=300,
-    #text_position=(215, 120),
-    text_position=(5, 118),
-    text_anchor_point=(0, 0),
-)
-
-## text 5 - silence alarm menu
-magtag.add_text(
-    text_font="fonts/Arial-Bold-12.pcf",
-    text_position=(8, 80),
-    text_scale=1,
-    line_spacing=0.7,
-    text_anchor_point=(0, 0),
-)
 
 #print("end addt ext", time.monotonic())
 
