@@ -513,9 +513,9 @@ else:
 
     except Exception:  # pylint: disable=broad-except
         print("Could not update display.")
-        print("Trying again in 30 seconds.")
+        print("Trying again in 60 seconds.")
         alarm.sleep_memory[0] = 0 # aka: all_ok_previous = 0, signal for screen refresh
-        magtag.exit_and_deep_sleep(30)
+        magtag.exit_and_deep_sleep(60)
 
     print("e-ink display updated, waiting", UI_wait_minutes, "minutes for button presses before sleeping")
 
