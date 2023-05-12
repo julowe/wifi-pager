@@ -373,24 +373,19 @@ if all_ok:
     else:
         alarm_silence_time = 0
 
+## Get NTP time
+#pool = socketpool.SocketPool(wifi.radio)
+try:
+    ntp = adafruit_ntp.NTP(socket, tz_offset=0)
+    #print(ntp.datetime)
 
-if all_ok_previous and all_ok and alarm_wake == "timer":
-    print("Not updating NTP time, woken by timer and previous status & current status is 'all ok'")
-    time_now_string = "Time not updated"
-else:
-    # Get NTP time
-    #pool = socketpool.SocketPool(wifi.radio)
-    try:
-        ntp = adafruit_ntp.NTP(socket, tz_offset=0)
-        #print(ntp.datetime)
-
-        time_now_string = "Updated at: {:d}-{:02d}-{:02d} {:02d}:{:02d}Z".format(ntp.datetime.tm_year, ntp.datetime.tm_mon, ntp.datetime.tm_mday, ntp.datetime.tm_hour, ntp.datetime.tm_min)
-        time_now_min = ntp.datetime.tm_min
-    except Exception as errorMessage:  # pylint: disable=broad-except
-        print("Could not get NTP time. Ignoring")
-        time_now_string = "Unable to get NTP time"
-        time_now_min = 59
-        print(errorMessage)
+    time_now_string = "Updated at: {:d}-{:02d}-{:02d} {:02d}:{:02d}Z".format(ntp.datetime.tm_year, ntp.datetime.tm_mon, ntp.datetime.tm_mday, ntp.datetime.tm_hour, ntp.datetime.tm_min)
+    time_now_min = ntp.datetime.tm_min
+except Exception as errorMessage:  # pylint: disable=broad-except
+    print("Could not get NTP time. Ignoring")
+    time_now_string = "Unable to get NTP time"
+    time_now_min = 59
+    print(errorMessage)
 
 print(time_now_string)
 
