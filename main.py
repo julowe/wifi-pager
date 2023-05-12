@@ -4,14 +4,11 @@
 
 # # TODO:
 # [] Look at neopixel color cycling (to show it is charging)
-# [x] get ntp time
 # [] quiet hours? prob not, more alert severity filtering better
 # [] do diff sleep when connected to computer
 # [] Move main text down a little off of status text
-# [] try more than one ssid
-# [] remove alert from end of json name?
+# [] remove "alert" from end of json name?
 # [] add low battery warning
-# [] refresh e-ink display every hour? (i.e. 0 < ntp_minute < 5)
 
 # example data from grafana v1 dashboard
 # {'evalData': {}, 'dashboardUid': 'n5qH1pcWk', 'url': '/graphs/d/n5qH1pcWk/temp-humidity', 'evalDate': '0001-01-01T00:00:00Z', 'id': 5, 'dashboardSlug': 'temp-humidity', 'state': 'ok', 'name': 'Rack Room alert', 'dashboardId': 1, 'executionError': '', 'panelId': 12, 'newStateDate': '2022-09-23T10:11:16Z'}
@@ -35,7 +32,8 @@ import board
 from adafruit_debouncer import Debouncer
 
 #print("end import", time.monotonic())
-# See if device woke from sleep, and how
+
+## See if device woke from sleep, and how
 #print(alarm.wake_alarm)
 alarm_triggered = alarm.wake_alarm
 
@@ -71,7 +69,7 @@ else:
 
 #print("end sleep mem", time.monotonic())
 
-# Get wifi details and more from a secrets.py file
+## Get wifi details and more from a secrets.py file
 try:
     from secrets import secrets
 except ImportError:
@@ -79,10 +77,10 @@ except ImportError:
     raise
 #print("wifi", time.monotonic())
 
-# TODO delete or fix for v8
+## TODO delete or fix for v8
 def font_width_to_dict(font):
-# Reads the font file to determine how wide each character is
-# Used to avoid bad wrapping breaking the QR code
+## Reads the font file to determine how wide each character is
+## Used to avoid bad wrapping breaking the QR code
     chars = {}
     with open(font, "r") as file:
         for line in file:
@@ -138,7 +136,8 @@ button_colors = ((255, 0, 0), (255, 150, 0), (0, 255, 255), (180, 0, 255))
 button_tones = (1047, 1318, 1568, 2093)
 
 #print("startmag", time.monotonic())
-# Initialize magtag object
+
+## Initialize magtag object
 magtag = MagTag()
 
 # TODO do we only want light flash when woken by button? or always, to show activity? don't think we'll see that indication most of the time...
@@ -157,9 +156,9 @@ magtag.set_background("bmps/jkl-initials.bmp")
 
 #print("end mag", time.monotonic())
 
-# get all_ok value from sleep_memory and save locally
+## get all_ok value from sleep_memory and save locally
 all_ok_previous = alarm.sleep_memory[0]
-# get alarm_silence_time value from sleep_memory and save locally
+## get alarm_silence_time value from sleep_memory and save locally
 alarm_silence_time = alarm.sleep_memory[1]
 
 #print("end read sleep", time.monotonic())
@@ -170,7 +169,7 @@ alert = "noise"
 
 data_url = ""
 wifi_connected = False
-# Set up WiFi
+## Set up WiFi
 for location in secrets:
     try:
         print("connecting to", location["ssid"])
@@ -213,18 +212,15 @@ list_nodata = list()
 list_alerting = list()
 list_alert_silence_minutes = [5, 10, 30, 99]
 
-# Get alarm statuses from Grafana
-
-# URL = "http://shiphouse.nautilus.oet.org/graphs/api/alerts/6"
-# URL = "http://shiphouse.nautilus.oet.org/graphs/api/alerts/"
+## Get alarm statuses from Grafana
 
 print(data_url)
 
-# turn lights off from bootup
+## turn lights off from bootup
 magtag.peripherals.neopixel_disable = True
 
-# try to ping server here to see if reachable
-# to avoid/inform about -2 error below when can;t reach server
+## try to ping server here to see if reachable
+## to avoid/inform about -2 error below when can;t reach server
 
 try:
     with https.get(data_url) as response:
@@ -286,7 +282,7 @@ except Exception:  # pylint: disable=broad-except
 
 #print("end json parse", time.monotonic())
 
-# update debugging boolean!
+## update debugging boolean!
 debug_bool = False
 if debug_bool:
     print("Debugging: set status to alerting to test things")
@@ -298,8 +294,8 @@ if debug_bool:
     if alert_initial_tone:
         magtag.peripherals.play_tone(button_tones[3], 0.25)
 
-# if nothing alerting, reset alarm silence time
-# this also functions such that silence 'for duration' silences all alarms (current and new ones) until all alerts are back to ok
+## if nothing alerting, reset alarm silence time
+## this also functions such that silence 'for duration' silences all alarms (current and new ones) until all alerts are back to ok
 if all_ok:
     alarm_silence_time = 0
 
@@ -328,7 +324,7 @@ print(time_now_string)
 
 #print("end ntp get", time.monotonic())
 
-# somewhere above her, start collecting errors and if any print them to screen
+## somewhere above here, start collecting errors and if any print them to screen
 
 
 # Construct text to display on e-ink
@@ -390,7 +386,7 @@ else:
 print(display_text)
 
 #print("start addtext", time.monotonic())
-# text 0 - main alarm status display - bigger text for when alerts are firing
+## text 0 - main alarm status display - bigger text for when alerts are firing
 magtag.add_text(
     text_font="fonts/Arial-Bold-12.pcf",
     text_wrap=36,
@@ -400,8 +396,7 @@ magtag.add_text(
     text_anchor_point=(0, 0),
 )
 
-# TODO make big All Ok text
-# Text 1 - big 'all ok' status text
+## text 1 - big 'all ok' status text
 magtag.add_text(
     #text_font="/fonts/Arial-Bold-12.bdf",
     #text_font="fonts/SourceSerifPro-Bold-AllOk-25.pcf",
@@ -426,7 +421,7 @@ magtag.add_text(
 #     text_anchor_point=(0, 0),
 # )
 
-# Text 2 - small status text in top left corner, down one line
+## text 2 - small status text in top left corner, down one line
 magtag.add_text(
     text_font="fonts/ArialMT-9.pcf",
     text_position=(7, 18),
@@ -436,7 +431,7 @@ magtag.add_text(
     text_anchor_point=(0, 0),
 )
 
-# text 3 - time & battery status bar
+## text 3 - time & battery status bar
 magtag.add_text(
     text_font="fonts/ArialMT-9.pcf",
     text_scale=1,
@@ -446,7 +441,7 @@ magtag.add_text(
     text_anchor_point=(0, 0),
 )
 
-# text 4 - button text
+## text 4 - button text
 magtag.add_text(
     text_font="fonts/ArialMT-9.pcf",
     text_scale=1,
@@ -457,7 +452,7 @@ magtag.add_text(
     text_anchor_point=(0, 0),
 )
 
-# text 5 - silence alarm menu
+## text 5 - silence alarm menu
 magtag.add_text(
     text_font="fonts/Arial-Bold-12.pcf",
     text_position=(8, 80),
@@ -467,7 +462,8 @@ magtag.add_text(
 )
 
 #print("end addt ext", time.monotonic())
-# Prepare to wrap the text correctly by getting the width of each character for every font
+
+## Prepare to wrap the text correctly by getting the width of each character for every font
 #arial_12 = font_width_to_dict("fonts/Arial-Bold-12.bdf")
 #arial_9 = font_width_to_dict("fonts/ArialMT-9.bdf")
 
@@ -676,7 +672,7 @@ else:
                 magtag.peripherals.neopixel_disable = True
 
 
-# after waiting UI_wait_minutes minutes for a button to be pressed, go back to sleep
+## after waiting UI_wait_minutes minutes for a button to be pressed, go back to sleep
 print("Going to sleep for", deep_sleep_minutes, "minutes")
 
 if screen_name == "main":
@@ -686,7 +682,7 @@ else:
     # if not on main screen, then we should update the screen next time it updates data
     alarm.sleep_memory[0] = 0
 
-# subtract UI_wait_minutes and upcoming deep_sleep_minutes from time to silence alarm (but not if ==99 or == 0)
+## subtract UI_wait_minutes and upcoming deep_sleep_minutes from time to silence alarm (but not if ==99 or == 0)
 if alarm_silence_time > 0:
     print("alarm silence time was:",alarm_silence_time)
     if alarm_silence_time != 99:
@@ -703,16 +699,16 @@ if alarm_silence_time > 0:
 
 #print(time.monotonic() - time_UI_start)
 
-# release buttons
+## release buttons
 magtag.peripherals.deinit()
 
-# wake up after deep_sleep_minutes minutes to check status
+## wake up after deep_sleep_minutes minutes to check status
 time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 60*deep_sleep_minutes)
 
-# wake up on button press - always refresh?
-# yes? why else would I be pressing a button when I can already see the screen?
+## wake up on button press - always refresh?
+## yes? why else would I be pressing a button when I can already see the screen?
 pin_alarm = alarm.pin.PinAlarm(pin=board.D11, value=False, pull=True)
 
-# sleep for deep_sleep_minutes or until D11 button pressed
+## sleep for deep_sleep_minutes or until D11 button pressed
 #alarm_triggered = alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
 alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
