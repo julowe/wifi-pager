@@ -494,10 +494,12 @@ else:
             magtag.set_text("                                                                    Wake Device", 4, False)
 
         if alerting_user:
-            if alarm_silence_time > 0:
-                magtag.set_text("Alarm Silenced for {} mins, set to:\n   {}           {}           {}     for duration".format(alarm_silence_time, list_alert_silence_minutes[0], list_alert_silence_minutes[1], list_alert_silence_minutes[2]), 5, False)
+            if alarm_silence_time == 99:
+                magtag.set_text("Alarm Silenced indefinitely, set to:\n   {}           {}           {}     indefinitely".format(alarm_silence_time, list_alert_silence_minutes[0], list_alert_silence_minutes[1], list_alert_silence_minutes[2]), 5, False)
+            elif alarm_silence_time > 0:
+                magtag.set_text("Alarm Silenced for {} mins, set to:\n   {}           {}           {}     indefinitely".format(alarm_silence_time, list_alert_silence_minutes[0], list_alert_silence_minutes[1], list_alert_silence_minutes[2]), 5, False)
             else:
-                magtag.set_text("Silence alarm for X mins:\n   {}           {}           {}     for duration".format(list_alert_silence_minutes[0], list_alert_silence_minutes[1], list_alert_silence_minutes[2]), 5, False)
+                magtag.set_text("Silence alarm for X mins:\n   {}           {}           {}     indefinitely".format(list_alert_silence_minutes[0], list_alert_silence_minutes[1], list_alert_silence_minutes[2]), 5, False)
         else:
             magtag.set_text("\nChecking status every {} minutes.".format(deep_sleep_minutes), 5, False)
 
