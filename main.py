@@ -316,9 +316,11 @@ else:
         #print(ntp.datetime)
 
         time_now_string = "Updated at: {:d}-{:02d}-{:02d} {:02d}:{:02d}Z".format(ntp.datetime.tm_year, ntp.datetime.tm_mon, ntp.datetime.tm_mday, ntp.datetime.tm_hour, ntp.datetime.tm_min)
+        time_now_min = ntp.datetime.tm_min
     except Exception as errorMessage:  # pylint: disable=broad-except
         #print("Could not get NTP time. Ignoring")
         time_now_string = "Unable to get NTP time"
+        time_now_min = 59
         print(errorMessage)
         #magtag.exit_and_deep_sleep(60)
 
@@ -481,13 +483,10 @@ else:
     UI_wait_minutes = 1
     deep_sleep_minutes = refresh_interval_mins_ok
 
-## Check status and alarm if needed, or just always refresh screen?
-# TODO also update screen every... hour?
-
-# alarm_triggered
-#print("startscreen", time.monotonic())
-if all_ok_previous and all_ok and alarm_wake == "timer":
-    print("Not updating e-ink display, previous status and current status is 'all ok'")
+## Check status and alarm if needed
+## refresh screen once an hour, during the first refresh interval
+if all_ok_previous and all_ok and alarm_wake == "timer" and time_now_min <= refresh_interval_mins_ok:
+    print("Not updating e-ink display, previous status and current status is 'all ok' and this isn't the first refresh of the hour (or I can't get time)")
     screen_name = "main"
 else:
     print("Updating e-ink display")
