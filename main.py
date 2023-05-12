@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 Eva Herrada for Adafruit Industries
+# SPDX-FileCopyrightText: 2021 Eva Herrada for Adafruit Industries, 2023 Justin Lowe
 #
 # SPDX-License-Identifier: MIT
 
@@ -14,9 +14,7 @@
 #{'evalData': None, 'dashboardUid': 'CBtIpJpGz', 'url': '/graphs/d/CBtIpJpGz/alert-dashboard', 'evalDate': '0001-01-01T00:00:00Z', 'id': 6, 'dashboardSlug': 'alert-dashboard', 'state': 'alerting', 'name': 'Sat System Pings from Shiphouse alert', 'dashboardId': 27, 'executionError': '', 'panelId': 8, 'newStateDate': '2022-09-23T20:46:16Z'}
 #alerting
 
-# import random
 import time
-#print("start", time.monotonic())
 import ssl
 import gc
 import wifi
@@ -29,7 +27,6 @@ import alarm
 import board
 from adafruit_debouncer import Debouncer
 
-#print("end import", time.monotonic())
 
 ## See if device woke from sleep, and how
 #print(alarm.wake_alarm)
@@ -138,8 +135,6 @@ button_tones = (1047, 1318, 1568, 2093)
 ## Initialize magtag object
 magtag = MagTag()
 
-# TODO do we only want light flash when woken by button? or always, to show activity? don't think we'll see that indication most of the time...
-# or mayve != "timer" ?
 if alarm_wake == "button":
     # turn light on when rebooted by user action
     magtag.peripherals.neopixel_disable = False
@@ -280,7 +275,6 @@ if not wifi_connected:
 
 #print("end wifi", time.monotonic())
 
-# TODO figure out what i want to alarm on and how
 ok_concise = True
 alert_initial_tone = False
 alerting_user = False
@@ -310,7 +304,6 @@ try:
             magtag.exit_and_deep_sleep(60)
 
         for i in R_JSON:
-            # save quick state in array to display values of alerts (when alerting or not)? or just parse json each time?? TODO
             if i["state"] == "ok":
                 #print(i["name"], "is ok")
                 #display_text += str(i["name"]) + " is ok\n"
@@ -334,7 +327,6 @@ try:
                 if alert_initial_tone:
                     magtag.peripherals.play_tone(button_tones[0], 0.25)
 
-            # TODO any other status we want to break out?
             else:
                 all_ok = False
                 #print(i["name"], "is", i["state"])
@@ -389,18 +381,16 @@ else:
     # Get NTP time
     #pool = socketpool.SocketPool(wifi.radio)
     try:
-        # TODO do better error catching and/or see if something to fix
         ntp = adafruit_ntp.NTP(socket, tz_offset=0)
         #print(ntp.datetime)
 
         time_now_string = "Updated at: {:d}-{:02d}-{:02d} {:02d}:{:02d}Z".format(ntp.datetime.tm_year, ntp.datetime.tm_mon, ntp.datetime.tm_mday, ntp.datetime.tm_hour, ntp.datetime.tm_min)
         time_now_min = ntp.datetime.tm_min
     except Exception as errorMessage:  # pylint: disable=broad-except
-        #print("Could not get NTP time. Ignoring")
+        print("Could not get NTP time. Ignoring")
         time_now_string = "Unable to get NTP time"
         time_now_min = 59
         print(errorMessage)
-        #magtag.exit_and_deep_sleep(60)
 
 print(time_now_string)
 

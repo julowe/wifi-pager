@@ -32,9 +32,9 @@ NB: Objects in the lower right are to be printed out of TPU or some other flexib
 
 ### v0.9
 - [ ] change case to use countersunk 3mm head depth bolts, vs 5mm depth socket cap bolts
-- [ ] make error message display on magtag screen if on boot you can't reach wifi
-- [ ] review code and see what TODOs are there and what other problems there are
-- [ ] make pager have two+ wifi networks to connect to, with different sleep intervals for each (e.g. on ship, refresh often. at home, be idle and sleep max, at third tbd place, refresh tbd)
+- [x] make error message display on magtag screen if on boot you can't reach wifi
+- [x] review code and see what TODOs are there and what other problems there are
+- [x] make pager have two+ wifi networks to connect to, with different sleep intervals for each (e.g. on ship, refresh often. at home, be idle and sleep max, at third tbd place, refresh tbd)
 
 I plan to skip v1.0 because a true 1.0 would require me to reprint the bullky case that can fit the old (larger) Qi charger, and I don't want to do that. So leaving v0.9 to reflect that it might not be production ready. v2 will be with directly soldered qi and thus smaller case, so will not be compatible with previous.
 
@@ -47,3 +47,4 @@ I plan to skip v1.0 because a true 1.0 would require me to reprint the bullky ca
 
 ### v2.1
 - [ ] think about adding vibration motor - space in case for motor, but also what pins to attach it to
+- [ ] update menu functionality on pager
