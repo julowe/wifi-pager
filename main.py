@@ -237,24 +237,25 @@ wifi_connected = False
 attempted_ssids = ""
 ## Set up WiFi
 for location in secrets:
-    try:
-        print("connecting to", location["ssid"])
-        wifi.radio.connect(location["ssid"], location["password"])
-        print(f"Connected to {location['ssid']}!")
-        print("My IP address is", wifi.radio.ipv4_address)
-        socket = socketpool.SocketPool(wifi.radio)
-        https = requests.Session(socket, ssl.create_default_context())
-    except Exception as errorMessage:  # pylint: disable=broad-except
-        print("Could not connect to wifi ssid:", location["ssid"], "at", location["name"])
-        print(errorMessage)
-        attempted_ssids += location["ssid"] + " "
-        # TODO add check to see which error?
-    else:
-        data_url = location["URL"]
-        wifi_connected = True
-        refresh_interval_mins_ok = location["refresh_interval"]
-        if location["alert_default"] == "mute" and alarm_triggered is None: #i.e. mute alarm by default and this is the first time code was run:
-            alarm_silence_time = 99 # 99 is a stand-in for 'indefinitely'
+    while not wifi_connected:
+        try:
+            print("connecting to", location["ssid"])
+            wifi.radio.connect(location["ssid"], location["password"])
+            print(f"Connected to {location['ssid']}!")
+            print("My IP address is", wifi.radio.ipv4_address)
+            socket = socketpool.SocketPool(wifi.radio)
+            https = requests.Session(socket, ssl.create_default_context())
+        except Exception as errorMessage:  # pylint: disable=broad-except
+            print("Could not connect to wifi ssid:", location["ssid"], "at", location["name"])
+            print(errorMessage)
+            attempted_ssids += location["ssid"] + " "
+            # TODO add check to see which error?
+        else:
+            data_url = location["URL"]
+            wifi_connected = True
+            refresh_interval_mins_ok = location["refresh_interval"]
+            if location["alert_default"] == "mute" and alarm_triggered is None: #i.e. mute alarm by default and this is the first time code was run:
+                alarm_silence_time = 99 # 99 is a stand-in for 'indefinitely'
 
 wifi_sleep_seconds_retry = 60
 if not wifi_connected:
