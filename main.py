@@ -229,8 +229,10 @@ magtag.add_text(
 )
 
 refresh_interval_mins_ok = 5
-refresh_interval_mins_alerting = 1
+#refresh_interval_mins_alerting = 1
+refresh_interval_mins_alerting = 0.5 # or maybe just zero? maybe better to have short break so the constant alarm noise doesn't get lost in background noise of ship
 alert = "noise"
+location_info = ""
 
 data_url = ""
 wifi_connected = False
@@ -238,6 +240,7 @@ attempted_ssids = ""
 ## Set up WiFi
 for location in secrets:
     while not wifi_connected:
+        location_info = location
         try:
             print("connecting to", location["ssid"])
             wifi.radio.connect(location["ssid"], location["password"])
@@ -346,6 +349,7 @@ except Exception:  # pylint: disable=broad-except
 
 
 ## update debugging boolean!
+debug_messages = False
 debug_bool = False
 if debug_bool:
     print("Debugging: set status to alerting to test things")
@@ -359,11 +363,16 @@ if debug_bool:
 
 ## if nothing alerting, reset alarm silence time
 ## this also functions such that silence 'for duration' silences all alarms (current and new ones) until all alerts are back to ok
-if all_ok:
-    if location["alert_default"] == "mute":
+if all_ok and not all_ok_previous:
+    if location_info["alert_default"] == "mute":
         alarm_silence_time = 99
     else:
         alarm_silence_time = 0
+    alarm.sleep_memory[1] = alarm_silence_time
+
+if debug_messages:
+    print("all_ok=", all_ok, "and location_info['alert_default']=", location_info['alert_default'], "and alarm_silence_time set to:", alarm_silence_time)
+    print(location_info)
 
 ## Get NTP time
 #pool = socketpool.SocketPool(wifi.radio)
@@ -451,7 +460,7 @@ print(display_text)
 
 ## if active alert, yell for UI_wait_minutes and then sleep for shorter time than if no alert
 if alerting_user:
-    UI_wait_minutes = 1
+    UI_wait_minutes = 3
     deep_sleep_minutes = refresh_interval_mins_alerting
 elif alarm_wake == "timer":
     UI_wait_minutes = 0.1 # do we even want any wait time if this thing just wakes on interval?
