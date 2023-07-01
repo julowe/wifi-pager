@@ -450,7 +450,7 @@ if list_nodata:
     #print("appended nodata")
     display_text_list.append(text_nodata)
 
-print("\n".join(display_text_list))
+#print("\n".join(display_text_list))
 
 if list_ok and not ok_concise:
     #print("appended ok")
@@ -463,7 +463,7 @@ else:
     display_text = "\n".join(display_text_list)
 
 
-print(display_text)
+print("Screen will display:", display_text)
 
 
 ## Prepare to wrap the text correctly by getting the width of each character for every font
@@ -604,6 +604,7 @@ else:
                     magtag.peripherals.play_tone(button_tones[i], 0.25)
                     #print("Button ", i)
                     print("setting to silence for", list_alert_silence_minutes[i])
+                    #TODO update eink display with something like 'Alarm silenced for list_alert_silence_minutes[i] mins. Change to:  '
                     break
 
                 # respond to button presses on non-alerting menu
