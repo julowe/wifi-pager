@@ -26,11 +26,13 @@ from adafruit_magtag.magtag import MagTag
 import alarm
 import board
 from adafruit_debouncer import Debouncer
+import supervisor
 
 
 ## See if device woke from sleep, and how
 #print(alarm.wake_alarm)
 alarm_triggered = alarm.wake_alarm
+print('alarm.wake_alarm:', alarm.wake_alarm)
 
 #print(alarm.sleep_memory[0])
 #if alarm.sleep_memory[0]:
@@ -40,6 +42,8 @@ alarm_triggered = alarm.wake_alarm
 
 #print(alarm.sleep_memory[1])
 
+#print(supervisor.runtime.run_reason)
+
 alarm_wake = "nothing"
 if alarm_triggered is not None:
     if isinstance(alarm_triggered, alarm.pin.PinAlarm):
@@ -48,9 +52,18 @@ if alarm_triggered is not None:
     elif isinstance(alarm_triggered, alarm.time.TimeAlarm):
         alarm_wake = "timer"
         print("Woken from sleep by timed alarm")
+#    elif supervisor.runtime.serial_connected:
+#        print("Yes, I am connected to serial so let's fake out the normal alarm.wake_alarm, setting alarm_wake equal to 'timer'")
+#        alarm_wake = "timer"
     else:
         print("Woken by something else...")
+elif supervisor.runtime.serial_connected:
+    print("Yes, I am connected to serial so let's fake out the normal alarm.wake_alarm, setting alarm_wake equal to 'timer'")
+    alarm_wake = "timer"
+    print("all_ok_previous stored in alarm.sleep_memory[0] =", alarm.sleep_memory[0])
+    print("alarm_silence_time stored in alarm.sleep_memory[1] =", alarm.sleep_memory[1])
 else:
+    #TODO I don't think we need this, reset button will clear memory. not sure about shutdown from low power and then recharge. will test that soon.
     print("Code running for first time")
 
     if alarm.sleep_memory[0] != 0:
@@ -469,6 +482,18 @@ else:
     UI_wait_minutes = 1
     deep_sleep_minutes = refresh_interval_mins_ok
 
+## if on serial always refresh fast, also later display of variables to actually show up in serial with late connect to /dev/tty...
+if supervisor.runtime.serial_connected:
+    if alerting_user:
+        UI_wait_minutes = 0.3 #make noise for longer, but still loop through faster than when not connected to usb
+    else:
+        UI_wait_minutes = 0.1
+
+    deep_sleep_minutes = 0.5
+    print("all_ok_previous stored in alarm.sleep_memory[0] =", alarm.sleep_memory[0])
+    print("alarm_silence_time stored in alarm.sleep_memory[1] =", alarm.sleep_memory[1])
+
+
 ## Check status and alarm if needed
 ## refresh screen once an hour, during the first refresh interval
 if all_ok_previous and all_ok and alarm_wake == "timer" and time_now_min >= refresh_interval_mins_ok:
@@ -687,8 +712,8 @@ if alarm_silence_time > 0:
         if alarm_silence_time < 0:
             alarm_silence_time = 0
 
-    alarm.sleep_memory[1] = int(alarm_silence_time)
-    print("sleep memory 1 is now:",alarm.sleep_memory[1])
+    alarm.sleep_memory[1] = int(alarm_silence_time) #this int conversion eats away at actual sleep time faster if we have non-integer lengths (like during usb-connected state) but shrug?
+    print("sleep memory 1 (alarm_silence_time) is now:",alarm.sleep_memory[1])
 
 
 
@@ -704,6 +729,14 @@ time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 60*deep_slee
 ## yes? why else would I be pressing a button when I can already see the screen?
 pin_alarm = alarm.pin.PinAlarm(pin=board.D11, value=False, pull=True)
 
-## sleep for deep_sleep_minutes or until D11 button pressed
-#alarm_triggered = alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
-alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
+print(supervisor.runtime.run_reason)
+
+if supervisor.runtime.serial_connected:
+    #time_fake_sleep = 15
+    print("Yes, I am connected to serial, sleeping for", deep_sleep_minutes*60, "seconds")
+    time.sleep(deep_sleep_minutes*60)
+    supervisor.reload()
+else:
+    ## sleep for deep_sleep_minutes or until D11 button pressed
+    #alarm_triggered = alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
+    alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
