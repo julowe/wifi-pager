@@ -689,7 +689,7 @@ module case_bottom() {
                     mirror([0,1,0]) {
                         resize([0, inlay_y, inlay_z], auto=[true,true,false]) {
                             linear_extrude(height = inlay_z, center = true) {       
-                                import("/home/justin/code/wifi-pager/jkl-initials-big.svg");
+                                import("jkl-initials-big.svg");
                             }
                         }
                     }
