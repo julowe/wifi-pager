@@ -684,8 +684,8 @@ module case_bottom() {
                 //remove material from bottom of case to show my initials 
                 //TODO move initials to mark center of qi RX loop
                 inlay_y = case_inner_y*0.7;
-                inlay_z = 1;
-                translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)/4 - 10, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)/2 - inlay_y/2+inlay_y, 0]){ //inlay translation a bit of magic numbers
+                inlay_z = 1.5;
+                translate([(case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness)/4 + 22, (case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness)/2 - inlay_y/2+inlay_y, 0]){ //inlay translation a bit of magic numbers
                     mirror([0,1,0]) {
                         resize([0, inlay_y, inlay_z], auto=[true,true,false]) {
                             linear_extrude(height = inlay_z, center = true) {       
@@ -693,16 +693,9 @@ module case_bottom() {
                             }
                         }
                     }
-                }
-                
-                
-                
-                
-                
-                
-                
-                
-            
+                } //end translate for jkl initials
+
+
                 //remove fake top half of rounded case, so we have a smooth top plane of case
                 translate([0,0,case_bottom_void_z + case_bottom_z]){
                     cube([case_wall_vertical_thickness+case_inner_x+case_wall_vertical_thickness, case_wall_vertical_thickness+case_inner_y+case_wall_vertical_thickness, case_rounding_rad*2]);
