@@ -1,3 +1,9 @@
 secrets.py
 settings.toml
 settings-*.toml
+backup*
+fonts-*/
+printed-*/
+stls/
+
+__pycache__/
