@@ -14,20 +14,19 @@
 #{'evalData': None, 'dashboardUid': 'CBtIpJpGz', 'url': '/graphs/d/CBtIpJpGz/alert-dashboard', 'evalDate': '0001-01-01T00:00:00Z', 'id': 6, 'dashboardSlug': 'alert-dashboard', 'state': 'alerting', 'name': 'Sat System Pings from Shiphouse alert', 'dashboardId': 27, 'executionError': '', 'panelId': 8, 'newStateDate': '2022-09-23T20:46:16Z'}
 #alerting
 
-import time
-import ssl
 import gc
-import wifi
-import socketpool
-import adafruit_requests as requests
+import ssl
+import time
 
 import adafruit_ntp
-from adafruit_magtag.magtag import MagTag
+import adafruit_requests as requests
 import alarm
 import board
-from adafruit_debouncer import Debouncer
+import socketpool
 import supervisor
-
+import wifi
+from adafruit_debouncer import Debouncer
+from adafruit_magtag.magtag import MagTag
 
 ## See if device woke from sleep, and how
 #print(alarm.wake_alarm)
@@ -393,7 +392,7 @@ try:
     ntp = adafruit_ntp.NTP(socket, tz_offset=0)
     #print(ntp.datetime)
 
-    time_now_string = "Updated at: {:d}-{:02d}-{:02d} {:02d}:{:02d}Z".format(ntp.datetime.tm_year, ntp.datetime.tm_mon, ntp.datetime.tm_mday, ntp.datetime.tm_hour, ntp.datetime.tm_min)
+    time_now_string = f"Updated at: {ntp.datetime.tm_year:d}-{ntp.datetime.tm_mon:02d}-{ntp.datetime.tm_mday:02d} {ntp.datetime.tm_hour:02d}:{ntp.datetime.tm_min:02d}Z"
     time_now_min = ntp.datetime.tm_min
 except Exception as errorMessage:  # pylint: disable=broad-except
     print("Could not get NTP time. Ignoring")
@@ -513,7 +512,7 @@ else:
 
         
         # Display updated time
-        magtag.set_text(time_now_string + ", " + battery_display_string + " {0:.2f}V".format(magtag.peripherals.battery), 3, False)
+        magtag.set_text(time_now_string + ", " + battery_display_string + f" {magtag.peripherals.battery:.2f}V", 3, False)
 
         # Display wake device text
         if all_ok:
@@ -524,13 +523,13 @@ else:
 
         if alerting_user:
             if alarm_silence_time == 99:
-                magtag.set_text("Alarm Silenced indefinitely, set to:\n   {}           {}           {}     indefinitely".format(alarm_silence_time, list_alert_silence_minutes[0], list_alert_silence_minutes[1], list_alert_silence_minutes[2]), 5, False)
+                magtag.set_text(f"Alarm Silenced indefinitely, set to:\n   {alarm_silence_time}           {list_alert_silence_minutes[0]}           {list_alert_silence_minutes[1]}     indefinitely", 5, False)
             elif alarm_silence_time > 0:
-                magtag.set_text("Alarm Silenced for {} mins, set to:\n   {}           {}           {}     indefinitely".format(alarm_silence_time, list_alert_silence_minutes[0], list_alert_silence_minutes[1], list_alert_silence_minutes[2]), 5, False)
+                magtag.set_text(f"Alarm Silenced for {alarm_silence_time} mins, set to:\n   {list_alert_silence_minutes[0]}           {list_alert_silence_minutes[1]}           {list_alert_silence_minutes[2]}     indefinitely", 5, False)
             else:
-                magtag.set_text("Silence alarm for X mins:\n   {}           {}           {}     indefinitely".format(list_alert_silence_minutes[0], list_alert_silence_minutes[1], list_alert_silence_minutes[2]), 5, False)
+                magtag.set_text(f"Silence alarm for X mins:\n   {list_alert_silence_minutes[0]}           {list_alert_silence_minutes[1]}           {list_alert_silence_minutes[2]}     indefinitely", 5, False)
         else:
-            magtag.set_text("\nChecking status every {} minutes.".format(deep_sleep_minutes), 5, False)
+            magtag.set_text(f"\nChecking status every {deep_sleep_minutes} minutes.", 5, False)
 
         # Display status of alerts
         if all_ok:
@@ -590,7 +589,7 @@ else:
                 # reset wait time when button pressed
                 time_UI_start = time.monotonic()
                 # Give feedback that button was pressed
-                print("Button %c pressed" % chr((ord("A") + i)))
+                print("Button %c pressed" % chr(ord("A") + i))
                 magtag.peripherals.neopixel_disable = False
                 magtag.peripherals.neopixels.fill(button_colors[i])
 
@@ -656,7 +655,7 @@ else:
                         magtag.set_text("List All Alerts                                                     Wake Device", 4, False)
                         #magtag.set_text("Wake Device", 4, False)
 
-                        magtag.set_text("\nChecking status every {} minutes.".format(deep_sleep_minutes), 5, False)
+                        magtag.set_text(f"\nChecking status every {deep_sleep_minutes} minutes.", 5, False)
 
                         # Display concise all ok status
                         magtag.set_text(display_text, 1)
@@ -710,8 +709,7 @@ if alarm_silence_time > 0:
         alarm_silence_time = alarm_silence_time - UI_wait_minutes - deep_sleep_minutes
 
         # sleep_memory can only be 0-255
-        if alarm_silence_time < 0:
-            alarm_silence_time = 0
+        alarm_silence_time = max(alarm_silence_time, 0)
 
     alarm.sleep_memory[1] = int(alarm_silence_time) #this int conversion eats away at actual sleep time faster if we have non-integer lengths (like during usb-connected state) but shrug?
     print("sleep memory 1 (alarm_silence_time) is now:",alarm.sleep_memory[1])
