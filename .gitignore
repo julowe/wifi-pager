@@ -5,5 +5,7 @@ backup*
 fonts-*/
 printed-*/
 stls/
+*.stl
+*.xcf
 
 __pycache__/
