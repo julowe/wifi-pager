@@ -14,6 +14,7 @@
 # import socketpool
 # import adafruit_requests as requests
 import time
+
 from adafruit_magtag.magtag import MagTag
 
 # # Get wifi details and more from a secrets.py file
@@ -213,11 +214,13 @@ arial_9 = font_width_to_dict("fonts/ArialMT-9.bdf")
 #
 
 
-
 # Set the text. On some characters, this fails. If so, run the whole file again in 5 seconds
 try:
     magtag.set_text("Don't Forget \nTo Tip Your \nBartender", 0, False)
-    magtag.set_text("Otherwise they might just not tell \nyou if you're walking in to \na death trap", 1)
+    magtag.set_text(
+        "Otherwise they might just not tell \nyou if you're walking in to \na death trap",
+        1,
+    )
     # magtag.exit_and_deep_sleep(3600)
 except Exception:  # pylint: disable=broad-except
     print("Could not set title or description: unsupported glyphs.")
@@ -230,7 +233,7 @@ button_tones = (1047, 1318, 1568, 2093)
 while True:
     for i, b in enumerate(magtag.peripherals.buttons):
         if not b.value:
-            print("Button %c pressed" % chr((ord("A") + i)))
+            print(f"Button {chr(ord('A') + i)} pressed")
             magtag.peripherals.neopixel_disable = False
             magtag.peripherals.neopixels.fill(button_colors[i])
             magtag.peripherals.play_tone(button_tones[i], 0.25)

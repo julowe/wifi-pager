@@ -14,6 +14,7 @@
 # import socketpool
 # import adafruit_requests as requests
 import time
+
 from adafruit_magtag.magtag import MagTag
 
 # # Get wifi details and more from a secrets.py file
@@ -27,7 +28,7 @@ from adafruit_magtag.magtag import MagTag
 magtag = MagTag()
 
 # magtag.set_background("bmps/oshwa_full.bmp")
-#magtag.set_background("bmps/cpu-sun.bmp")
+# magtag.set_background("bmps/cpu-sun.bmp")
 magtag.set_background("bmps/jkl-initials.bmp")
 
 # # Set up WiFi
@@ -187,7 +188,7 @@ magtag.add_text(
 
 # Create the QR code
 # url = f"https://certification.oshwa.org/{selected['oshwaUid'].lower()}.html"
-#url = "https://venmo.com/code?user_id=1777124390207488863&created=1654029427.873137"
+# url = "https://venmo.com/code?user_id=1777124390207488863&created=1654029427.873137"
 url = "https://jklideas.com/magtag-case-wifi-pager/"
 magtag.graphics.qrcode(url, qr_size=4, x=168, y=2)
 
@@ -215,10 +216,9 @@ arial_9 = font_width_to_dict("fonts/ArialMT-9.bdf")
 #
 
 
-
 # Set the text. On some characters, this fails. If so, run the whole file again in 5 seconds
 try:
-    #magtag.set_text("Don't Forget \nTo Tip Your \nBartender", 0, False)
+    # magtag.set_text("Don't Forget \nTo Tip Your \nBartender", 0, False)
     magtag.set_text("MagTag Case & \nWifi Pager", 0, False)
     magtag.set_text("By Justin Lowe - jklideas.com", 1)
     # magtag.exit_and_deep_sleep(3600)
@@ -233,7 +233,7 @@ button_tones = (1047, 1318, 1568, 2093)
 while True:
     for i, b in enumerate(magtag.peripherals.buttons):
         if not b.value:
-            print("Button %c pressed" % chr((ord("A") + i)))
+            print(f"Button {chr(ord('A') + i)} pressed")
             magtag.peripherals.neopixel_disable = False
             magtag.peripherals.neopixels.fill(button_colors[i])
             magtag.peripherals.play_tone(button_tones[i], 0.25)
