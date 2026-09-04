@@ -22,11 +22,13 @@ import adafruit_ntp
 import adafruit_requests as requests
 import alarm
 import board
+import config
 import socketpool
 import supervisor
 import wifi
 from adafruit_debouncer import Debouncer
 from adafruit_magtag.magtag import MagTag
+from dashboard_state import DashboardState
 
 ## See if device woke from sleep, and how
 # print(alarm.wake_alarm)
@@ -301,14 +303,25 @@ if not wifi_connected:
     magtag.exit_and_deep_sleep(wifi_sleep_seconds_retry)
 
 
-ok_concise = True
+## Get NTP time
+current_time = None
+try:
+    ntp = adafruit_ntp.NTP(socket, tz_offset=0)
+    current_time = ntp.datetime
+    time_now_string = f"Updated at: {current_time.tm_year:d}-{current_time.tm_mon:02d}-{current_time.tm_mday:02d} {current_time.tm_hour:02d}:{current_time.tm_min:02d}Z"
+    time_now_min = current_time.tm_min
+except Exception as errorMessage:  # pylint: disable=broad-except
+    print("Could not get NTP time. Ignoring")
+    current_time = None
+    time_now_string = "Unable to get NTP time"
+    time_now_min = 59
+    print(errorMessage)
+
+print(time_now_string)
+
 alert_initial_tone = False
 alerting_user = False
 all_ok = True
-list_ok = []
-list_pending = []
-list_nodata = []
-list_alerting = []
 list_alert_silence_minutes = [5, 10, 30, 99]
 
 ## Get alarm statuses from Grafana
@@ -329,45 +342,7 @@ try:
             print("Could not parse json. Trying again in 60 seconds.")
             magtag.exit_and_deep_sleep(60)
 
-        for i in R_JSON:
-            if i["state"] == "ok":
-                # print(i["name"], "is ok")
-                # display_text += str(i["name"]) + " is ok\n"
-                list_ok.append(str(i["name"]))
-
-            elif i["state"] == "pending":
-                all_ok = False
-                # print(i["name"], "is", i["state"])
-                # display_text += str(i["name"]) + " is pending\n"
-                list_pending.append(str(i["name"]))
-
-                if alert_initial_tone:
-                    magtag.peripherals.play_tone(button_tones[0], 0.25)
-
-            elif i["state"] == "no_data":
-                all_ok = False
-                # print(i["name"], "is", i["state"])
-                # display_text += str(i["name"]) + " is pending\n"
-                list_nodata.append(str(i["name"]))
-
-                if alert_initial_tone:
-                    magtag.peripherals.play_tone(button_tones[0], 0.25)
-
-            else:
-                all_ok = False
-                # print(i["name"], "is", i["state"])
-                # display_text += str(i["name"]) + " is " + str(i["state"]) + "\n"
-                alerting_user = True
-                list_alerting.append(str(i["name"]))
-
-                # turn on lights if error and leave on
-                magtag.peripherals.neopixel_disable = False
-                magtag.peripherals.neopixels.fill(button_colors[3])
-
-                if alert_initial_tone:
-                    magtag.peripherals.play_tone(button_tones[3], 0.25)
-                # teal (0, 255, 255)
-                # purple (180, 0, 255)
+        state = DashboardState(R_JSON, config=config, current_time=current_time)
 
         # clean up JSON stuff, so save anything you want!
         R_JSON.clear()
@@ -376,6 +351,20 @@ try:
 except Exception:  # pylint: disable=broad-except
     print("Could not get url. Trying again in 60 seconds.")
     magtag.exit_and_deep_sleep(60)
+
+all_ok = state.is_all_ok
+if state.has_criticals or state.has_alerts:
+    alerting_user = True
+    # turn on lights if error and leave on
+    magtag.peripherals.neopixel_disable = False
+    magtag.peripherals.neopixels.fill(button_colors[3])
+
+    if alert_initial_tone:
+        magtag.peripherals.play_tone(button_tones[3], 0.25)
+elif state.has_warnings:
+    magtag.peripherals.neopixel_disable = True
+    if alert_initial_tone:
+        magtag.peripherals.play_tone(button_tones[0], 0.25)
 
 
 ## update debugging boolean!
@@ -411,81 +400,17 @@ if debug_messages:
     )
     print(location_info)
 
-## Get NTP time
-# pool = socketpool.SocketPool(wifi.radio)
-try:
-    ntp = adafruit_ntp.NTP(socket, tz_offset=0)
-    # print(ntp.datetime)
-
-    time_now_string = f"Updated at: {ntp.datetime.tm_year:d}-{ntp.datetime.tm_mon:02d}-{ntp.datetime.tm_mday:02d} {ntp.datetime.tm_hour:02d}:{ntp.datetime.tm_min:02d}Z"
-    time_now_min = ntp.datetime.tm_min
-except Exception as errorMessage:  # pylint: disable=broad-except
-    print("Could not get NTP time. Ignoring")
-    time_now_string = "Unable to get NTP time"
-    time_now_min = 59
-    print(errorMessage)
-
-print(time_now_string)
-
-
 ## somewhere above here, start collecting errors and if any print them to screen
 
 
 # Construct text to display on e-ink
-text_ok = ", ".join(list_ok)
-text_pending = ", ".join(list_pending)
-text_nodata = ", ".join(list_nodata)
-text_alerting = ", ".join(list_alerting)
-
-# TODO change pending to warning? not quite right. alerting change to critical?
-if len(list_alerting) > 1:
-    text_alerting += " are alerting."
+display_text = state.get_display_summary()
+if len(state.healthy_alerts) > 1:
+    text_ok = f"{', '.join(state.healthy_alerts)} are ok."
+elif state.healthy_alerts:
+    text_ok = f"{state.healthy_alerts[0]} is ok."
 else:
-    text_alerting += " is alerting."
-
-if len(list_pending) > 1:
-    text_pending += " are pending."
-else:
-    text_pending += " is pending."
-
-if len(list_nodata) > 1:
-    text_nodata += " have no data."
-else:
-    text_nodata += " has no data."
-
-if len(list_ok) > 1:
-    text_ok += " are ok."
-else:
-    text_ok += " is ok."
-
-# print(text_ok)
-# print(text_pending)
-# print(text_nodata)
-# print(text_alerting)
-
-display_text_list = []
-if list_alerting:
-    # print("appended alerting")
-    display_text_list.append(text_alerting)
-if list_pending:
-    # print("appended pending")
-    display_text_list.append(text_pending)
-if list_nodata:
-    # print("appended nodata")
-    display_text_list.append(text_nodata)
-
-# print("\n".join(display_text_list))
-
-if list_ok and not ok_concise:
-    # print("appended ok")
-    display_text_list.append(text_ok)
-
-
-if not list_alerting and not list_pending and not list_nodata and ok_concise:
-    display_text = "All Ok  :-)"
-else:
-    display_text = "\n".join(display_text_list)
-
+    text_ok = "All Ok  :-)"
 
 print("Screen will display:", display_text)
 
