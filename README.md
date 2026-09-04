@@ -60,13 +60,61 @@ Tested and compatible with CircuitPython 10.x (specifically CircuitPython 10.2.1
      - `simpleio.mpy`
      - `adafruit_ticks.mpy`
 
-### Development & Off-Device Testing
+### Development Environment & Testing
 
-The alert parsing and categorization logic lives in `dashboard_state.py` without any microcontroller hardware dependencies. You can run the unit test suite locally on your computer:
+#### Setting Up with uv
 
-```bash
-.venv/bin/pytest tests/test_dashboard_state.py -v
-```
+We use [`uv`](https://docs.astral.sh/uv/) for fast environment and dependency management. Because this is an embedded CircuitPython project rather than a distributable Python library, `pyproject.toml` is configured with `package = false` so `uv` manages the virtual environment without installing the repo as a package.
+
+1. **Create the environment and sync dev tools:**
+
+   Run `uv sync` to automatically create `.venv/` and install all tools (`pytest`, `ruff`, `pre-commit`):
+
+   ```bash
+   uv sync
+   ```
+
+2. **Install git pre-commit hooks:**
+
+   Install the pre-commit hook scripts into your local `.git/hooks`:
+
+   ```bash
+   uv run pre-commit install
+   ```
+
+#### Checking Files Manually
+
+You can check code style, linting, and tests on-demand using `uv run`:
+
+- **Run all pre-commit hooks across the repository:**
+
+  ```bash
+  uv run pre-commit run --all-files
+  ```
+
+- **Run Ruff linting and formatting:**
+
+  ```bash
+  uv run ruff check .          # Check for lint errors (includes pyflakes, pycodestyle, PLC rules)
+  uv run ruff check --fix .    # Automatically fix safe lint issues
+  uv run ruff format .         # Format code
+  ```
+
+- **Run unit tests:**
+
+  The alert parsing and categorization logic lives in `dashboard_state.py` without microcontroller hardware dependencies. Run the test suite with:
+
+  ```bash
+  uv run pytest -v
+  ```
+
+#### Automated Checks via pre-commit
+
+Once `pre-commit install` has been run, checks are run automatically on every `git commit`:
+
+- Pre-commit intercepts staged files and passes them through the configured hooks in `.pre-commit-config.yaml` (`ruff`, `ruff-format`, `codespell`, and basic file sanity checks).
+- If any check reports an error or reformats a file (e.g., trimming trailing whitespace or fixing formatting), the commit is blocked.
+- Review any automated edits or resolve remaining errors, re-stage the affected files with `git add`, and re-run `git commit`.
 
 ## Hardware
 
