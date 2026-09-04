@@ -22,12 +22,13 @@ import adafruit_ntp
 import adafruit_requests as requests
 import alarm
 import board
-import config
 import socketpool
 import supervisor
 import wifi
 from adafruit_debouncer import Debouncer
 from adafruit_magtag.magtag import MagTag
+
+import config
 from dashboard_state import DashboardState
 
 ## See if device woke from sleep, and how
