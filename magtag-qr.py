@@ -47,7 +47,7 @@ def font_width_to_dict(font):
     # Reads the font file to determine how wide each character is
     # Used to avoid bad wrapping breaking the QR code
     chars = {}
-    with open(font, "r") as file:
+    with open(font) as file:
         for line in file:
             if "FONTBOUNDINGBOX" in line:
                 size = int(line.split(" ")[1])
@@ -70,10 +70,7 @@ def wrap(text, max_width, max_lines, font):
     for word in text.split(" "):
         for character in word:
             line_width += font[character]
-            if (
-                len(lines) + 1 != max_lines
-                or sum(font[i] for i in word) + line_width <= max_width
-            ):
+            if len(lines) + 1 != max_lines or sum(font[i] for i in word) + line_width <= max_width:
                 if line_width > max_width:
                     print(str(line_width) + line)
                     line_width = sum(font[i] for i in word)
