@@ -1,0 +1,53 @@
+[project]
+name = "wifi-pager"
+version = "0.1.0"
+description = "WiFi Pager running on Adafruit MagTag"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "codespell",
+  "pre-commit",
+  "pytest",
+  "pytest-mock",
+  "ruff",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+# Following Adafruit's core circuitpython repo, targeting py312 to allow modern syntax supported by CP 9.x
+target-version = "py312"
+line-length = 100
+format.quote-style = "double"
+lint.select = [ "B", "C9", "E", "F", "PLC", "UP", "W" ]
+lint.ignore = [
+  # E501: line too long (common for hardware constants/URLs)
+  "E501",
+  # PLC0415: conditional imports are common in MicroPython
+  "PLC0415",
+]
+lint.mccabe.max-complexity = 40
+
+[tool.codespell]
+skip = "./.git,./dotSCAD,./fonts,./fonts-original,./bmps,./.venv,./stls,*.stl,*.brd,*.sch,*.png,*.xcf,*.bdf,uv.lock"
+ignore-words-list = "bootup"
+
+[tool.pytest]
+ini_options.minversion = "6.0"
+ini_options.addopts = "-ra -q"
+ini_options.testpaths = [
+  "tests",
+]
