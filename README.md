@@ -35,13 +35,17 @@ Tested and compatible with CircuitPython 10.x (specifically CircuitPython 10.2.1
 4. Install libraries to `CIRCUITPY/lib/`:
    - **Recommended (automatic via circup):**
      Ensure your MagTag is connected via USB, then run:
+
      ```bash
      circup --path /media/$USER/CIRCUITPY install --auto
      ```
+
      To keep all existing libraries on the device up to date with CircuitPython 10:
+
      ```bash
      circup --path /media/$USER/CIRCUITPY update
      ```
+
    - **Manual copy:**
      Copy the `lib/` directory from this repository (or from the official Adafruit CircuitPython 10.x Library Bundle) to `CIRCUITPY/lib/`. The required libraries are:
      - `adafruit_magtag/`
@@ -150,3 +154,6 @@ so will not be compatible with previous.
 - [ ] think about adding vibration motor - space in case for motor,
       but also what pins to attach it to
 - [ ] update menu functionality on pager
+- [ ] device bootup screen(s)
+  - partly to clear old errors on bootup
+  - partly to show what stage it maybe failed at
