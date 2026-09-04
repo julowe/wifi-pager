@@ -11,12 +11,58 @@ Software will mostly work but probably hit edge cases and crash/hang.
 
 ## Software
 
+### Compatibility
+
+Tested and compatible with CircuitPython 10.x (specifically CircuitPython 10.2.1 on Adafruit MagTag ESP32-S2).
+
 ### Installation
 
-Copy to your magtag the directories `bmps`, `lib`, and `fonts` and the file `main.py`.
-Edit the file `secrets.py.template` to have you SSID info
-(AIO info is not currently used) and rename the file to `secrets.py`,
-and copy to your magtag.
+1. Copy the following project files and folders to the root of your `CIRCUITPY` drive:
+   - `main.py` — main application entry point and hardware event loop
+   - `dashboard_state.py` — pure-logic alert parsing, duration math, and state classification
+   - `config.py` — configuration for warning/critical duration thresholds and critical alert lists
+   - `bmps/` — graphical assets
+   - `fonts/` — custom fonts for e-ink display
+2. Set up your secrets:
+   - Copy `secrets.py.template` to `secrets.py`
+   - Fill in your WiFi network SSIDs, passwords, and Grafana endpoints
+   - Copy `secrets.py` to the root of your `CIRCUITPY` drive
+3. Configure alert thresholds (optional):
+   - In `config.py`, customize:
+     - `WARNING_MINUTES` (default 5): duration before a `no_data` alert escalates to Alert
+     - `CRITICAL_MINUTES` (default 30): duration before an `alerting` alert escalates to Critical
+     - `ALWAYS_CRITICAL_ALERTS`: list of alert names that immediately escalate to Critical when alerting
+4. Install libraries to `CIRCUITPY/lib/`:
+   - **Recommended (automatic via circup):**
+     Ensure your MagTag is connected via USB, then run:
+     ```bash
+     circup --path /media/$USER/CIRCUITPY install --auto
+     ```
+     To keep all existing libraries on the device up to date with CircuitPython 10:
+     ```bash
+     circup --path /media/$USER/CIRCUITPY update
+     ```
+   - **Manual copy:**
+     Copy the `lib/` directory from this repository (or from the official Adafruit CircuitPython 10.x Library Bundle) to `CIRCUITPY/lib/`. The required libraries are:
+     - `adafruit_magtag/`
+     - `adafruit_portalbase/`
+     - `adafruit_requests.mpy`
+     - `adafruit_ntp.mpy`
+     - `adafruit_debouncer.mpy`
+     - `adafruit_display_text/`
+     - `adafruit_bitmap_font/`
+     - `adafruit_pixelbuf.mpy`
+     - `neopixel.mpy`
+     - `simpleio.mpy`
+     - `adafruit_ticks.mpy`
+
+### Development & Off-Device Testing
+
+The alert parsing and categorization logic lives in `dashboard_state.py` without any microcontroller hardware dependencies. You can run the unit test suite locally on your computer:
+
+```bash
+.venv/bin/pytest tests/test_dashboard_state.py -v
+```
 
 ## Hardware
 
