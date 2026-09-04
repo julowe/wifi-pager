@@ -73,11 +73,14 @@ def _to_timestamp(t):
     if isinstance(t, str):
         return _parse_iso8601(t)
     try:
-        import calendar
+        try:
+            import calendar
 
-        return float(calendar.timegm(t))
-    except (ImportError, AttributeError):
-        return float(time.mktime(t))
+            return float(calendar.timegm(t))
+        except (ImportError, AttributeError):
+            return float(time.mktime(t))
+    except (TypeError, ValueError, OverflowError, KeyError):
+        return None
 
 
 class DashboardState:
@@ -97,7 +100,9 @@ class DashboardState:
             self._critical_minutes = config.get("CRITICAL_MINUTES", 30)
             self._always_critical_alerts = config.get("ALWAYS_CRITICAL_ALERTS", [])
         else:
-            self._warning_minutes = getattr(config, "WARNING_MINUTES", 5) if config else 5
+            self._warning_minutes = (
+                getattr(config, "WARNING_MINUTES", 5) if config else 5
+            )
             self._critical_minutes = (
                 getattr(config, "CRITICAL_MINUTES", 30) if config else 30
             )
@@ -124,6 +129,10 @@ class DashboardState:
 
             name = str(item.get("name", "Unknown alert"))
             raw_state = item.get("state", "alerting")
+            if isinstance(raw_state, str):
+                raw_state = raw_state.strip().lower()
+            else:
+                raw_state = str(raw_state).strip().lower()
             new_state_date = item.get("newStateDate")
 
             # Calculate duration in minutes if current_ts and new_state_date are available
