@@ -478,7 +478,7 @@ else:
                 False,
             )
         else:
-            # this differnce is mostly bc it isn't coded yet to show a long status screen when all alerts are not in ok state
+            # this difference is mostly bc it isn't coded yet to show a long status screen when all alerts are not in ok state
             magtag.set_text(
                 "                                                                    Wake Device",
                 4,
@@ -540,9 +540,7 @@ else:
     # set up debounce buttons
     switches = []
     # pin=board.D11
-    for i, b in enumerate(magtag.peripherals.buttons):
-        # print(i)
-        # print(b)
+    for b in magtag.peripherals.buttons:
         switches.append(Debouncer(b))
 
     # if alarm_silence_time > 0 and alerting_user:

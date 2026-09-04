@@ -349,7 +349,7 @@ def test_state_input_sanitization():
 
 def test_defensive_current_time_handling():
     alerts = [{"name": "DB Down", "state": "alerting", "newStateDate": "2022-09-23T10:00:00Z"}]
-    # Passing an unparseable object or malformed tuple should not raise TypeError/ValueError,
+    # Passing an unparsable object or malformed tuple should not raise TypeError/ValueError,
     # but fall back safely as current_time=None (failsafe: alerting -> critical immediately)
     state_bad_list = DashboardState(alerts, current_time=[1, 2, 3])
     assert state_bad_list.has_criticals is True
