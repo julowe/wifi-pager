@@ -93,7 +93,7 @@ def font_width_to_dict(font):
     ## Reads the font file to determine how wide each character is
     ## Used to avoid bad wrapping breaking the QR code
     chars = {}
-    with open(font, "r") as file:
+    with open(font) as file:
         for line in file:
             if "FONTBOUNDINGBOX" in line:
                 size = int(line.split(" ")[1])
@@ -116,10 +116,7 @@ def wrap(text, max_width, max_lines, font):
     for word in text.split(" "):
         for character in word:
             line_width += font[character]
-            if (
-                len(lines) + 1 != max_lines
-                or sum(font[i] for i in word) + line_width <= max_width
-            ):
+            if len(lines) + 1 != max_lines or sum(font[i] for i in word) + line_width <= max_width:
                 if line_width > max_width:
                     print(str(line_width) + line)
                     line_width = sum(font[i] for i in word)
@@ -297,9 +294,7 @@ if not wifi_connected:
     magtag.set_text("Can't connect to " + attempted_ssids + "!", 0)
     print("Available WiFi networks:")
     for network in wifi.radio.start_scanning_networks():
-        print(
-            f"\t{str(network.ssid, 'utf-8')}\t\tRSSI: {network.rssi}\tChannel: {network.channel}"
-        )
+        print(f"\t{str(network.ssid, 'utf-8')}\t\tRSSI: {network.rssi}\tChannel: {network.channel}")
     wifi.radio.stop_scanning_networks()
     magtag.exit_and_deep_sleep(wifi_sleep_seconds_retry)
 
@@ -426,9 +421,7 @@ if alerting_user:
     UI_wait_minutes = 3
     deep_sleep_minutes = refresh_interval_mins_alerting
 elif alarm_wake == "timer":
-    UI_wait_minutes = (
-        0.1  # do we even want any wait time if this thing just wakes on interval?
-    )
+    UI_wait_minutes = 0.1  # do we even want any wait time if this thing just wakes on interval?
     deep_sleep_minutes = refresh_interval_mins_ok
 else:
     UI_wait_minutes = 1
@@ -472,10 +465,7 @@ else:
 
         # Display updated time
         magtag.set_text(
-            time_now_string
-            + ", "
-            + battery_display_string
-            + f" {magtag.peripherals.battery:.2f}V",
+            time_now_string + ", " + battery_display_string + f" {magtag.peripherals.battery:.2f}V",
             3,
             False,
         )
@@ -515,9 +505,7 @@ else:
                     False,
                 )
         else:
-            magtag.set_text(
-                f"\nChecking status every {deep_sleep_minutes} minutes.", 5, False
-            )
+            magtag.set_text(f"\nChecking status every {deep_sleep_minutes} minutes.", 5, False)
 
         # Display status of alerts
         if all_ok:
@@ -723,9 +711,7 @@ if alarm_silence_time > 0:
 magtag.peripherals.deinit()
 
 ## wake up after deep_sleep_minutes minutes to check status
-time_alarm = alarm.time.TimeAlarm(
-    monotonic_time=time.monotonic() + 60 * deep_sleep_minutes
-)
+time_alarm = alarm.time.TimeAlarm(monotonic_time=time.monotonic() + 60 * deep_sleep_minutes)
 
 ## wake up on button press - always refresh?
 ## yes? why else would I be pressing a button when I can already see the screen?

@@ -253,9 +253,7 @@ def test_display_summary_pluralization_and_ordering():
     current_time = "2022-09-23T10:35:00Z"
     state = DashboardState(alerts, current_time=current_time)
     expected_summary = (
-        "Database, Auth API are critical.\n"
-        "Disk A, Disk B are alerting.\n"
-        "Cache, Queue are warning."
+        "Database, Auth API are critical.\nDisk A, Disk B are alerting.\nCache, Queue are warning."
     )
     assert state.get_display_summary() == expected_summary
 
@@ -325,9 +323,7 @@ def test_dict_config():
             "newStateDate": "2022-09-23T10:00:00Z",
         }
     ]
-    state = DashboardState(
-        alerts, config=custom_cfg, current_time="2022-09-23T10:01:00Z"
-    )
+    state = DashboardState(alerts, config=custom_cfg, current_time="2022-09-23T10:01:00Z")
     assert state.has_criticals is True
     assert state.critical_alerts == ["Immediate"]
 
@@ -352,9 +348,7 @@ def test_state_input_sanitization():
 
 
 def test_defensive_current_time_handling():
-    alerts = [
-        {"name": "DB Down", "state": "alerting", "newStateDate": "2022-09-23T10:00:00Z"}
-    ]
+    alerts = [{"name": "DB Down", "state": "alerting", "newStateDate": "2022-09-23T10:00:00Z"}]
     # Passing an unparseable object or malformed tuple should not raise TypeError/ValueError,
     # but fall back safely as current_time=None (failsafe: alerting -> critical immediately)
     state_bad_list = DashboardState(alerts, current_time=[1, 2, 3])

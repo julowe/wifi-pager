@@ -39,8 +39,7 @@ def _parse_iso8601(date_str):
             time_part, tz_s = time_part.split("-", 1)
             tz_parts = tz_s.split(":")
             tz_offset_seconds = -(
-                int(tz_parts[0]) * 3600
-                + (int(tz_parts[1]) * 60 if len(tz_parts) > 1 else 0)
+                int(tz_parts[0]) * 3600 + (int(tz_parts[1]) * 60 if len(tz_parts) > 1 else 0)
             )
 
         if "." in time_part:
@@ -100,12 +99,8 @@ class DashboardState:
             self._critical_minutes = config.get("CRITICAL_MINUTES", 30)
             self._always_critical_alerts = config.get("ALWAYS_CRITICAL_ALERTS", [])
         else:
-            self._warning_minutes = (
-                getattr(config, "WARNING_MINUTES", 5) if config else 5
-            )
-            self._critical_minutes = (
-                getattr(config, "CRITICAL_MINUTES", 30) if config else 30
-            )
+            self._warning_minutes = getattr(config, "WARNING_MINUTES", 5) if config else 5
+            self._critical_minutes = getattr(config, "CRITICAL_MINUTES", 30) if config else 30
             self._always_critical_alerts = (
                 getattr(config, "ALWAYS_CRITICAL_ALERTS", []) if config else []
             )
