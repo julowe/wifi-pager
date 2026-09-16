@@ -230,3 +230,5 @@ so will not be compatible with previous.
   - partly to clear old errors on bootup
   - partly to show what stage it maybe failed at
 - [ ] show last updated time in local timezone on pager screen (and keep Zulu?)
+- [ ] change 'wake device' text to 'Check Now' or 'Check Alerts' or something
+- [ ] add a 'OTA 5 min' button which will wake up device and keep it awake for 'last wifi connection' + 5 minutes to allow OTA updates to be done
