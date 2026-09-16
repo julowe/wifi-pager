@@ -229,3 +229,4 @@ so will not be compatible with previous.
 - [ ] device bootup screen(s)
   - partly to clear old errors on bootup
   - partly to show what stage it maybe failed at
+- [ ] show last updated time in local timezone on pager screen (and keep Zulu?)
