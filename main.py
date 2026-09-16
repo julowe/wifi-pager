@@ -84,14 +84,6 @@ else:
         print("Resetting sleep_memory[1] (alarm_silence_time) to 0")
 
 
-## Get wifi details and more from a secrets.py file
-try:
-    from secrets import secrets
-except ImportError:
-    print("WiFi secrets are kept in secrets.py, please add them there!")
-    raise
-
-
 ## TODO delete or fix for v8
 def font_width_to_dict(font):
     ## Reads the font file to determine how wide each character is
@@ -150,16 +142,16 @@ button_tones = (1047, 1318, 1568, 2093)
 
 ## Initialize magtag object
 magtag = MagTag()
+magtag.peripherals.neopixel_disable = False
+magtag.peripherals.neopixels.fill((0, 0, 0))
 
 if alarm_wake == "button":
     # turn light on when rebooted by user action
-    magtag.peripherals.neopixel_disable = False
     magtag.peripherals.neopixels.fill(button_colors[2])
     # teal (0, 255, 255)
     # keep lights on for half a second
     time.sleep(0.5)
-    # turn lights off and move on
-    # magtag.peripherals.neopixel_disable = True
+    magtag.peripherals.neopixels.fill((0, 0, 0))
 
 magtag.set_background("bmps/jkl-initials.bmp")
 
@@ -247,6 +239,23 @@ magtag.add_text(
     text_anchor_point=(0, 0),
 )
 
+
+def clear_screen():
+    for i in range(6):
+        magtag.set_text("", i, False)
+
+
+## Get wifi details and more from a secrets.py file
+try:
+    from secrets import secrets
+except ImportError:
+    print("WiFi secrets are kept in secrets.py, please add them there!")
+    magtag.peripherals.neopixel_disable = False
+    magtag.peripherals.neopixels.fill((255, 0, 0))
+    clear_screen()
+    magtag.set_text("Error: Missing secrets.py", 1)
+    raise
+
 refresh_interval_mins_ok = 5
 # refresh_interval_mins_alerting = 1
 refresh_interval_mins_alerting = 0.5  # or maybe just zero? maybe better to have short break so the constant alarm noise doesn't get lost in background noise of ship
@@ -256,7 +265,11 @@ location_info = ""
 data_url = ""
 wifi_connected = False
 attempted_ssids = ""
-## Set up WiFi
+
+## Set up WiFi (Pixel 3 / 1st Light on left)
+magtag.peripherals.neopixel_disable = False
+magtag.peripherals.neopixels[3] = (0, 0, 255)  # Blue: connecting
+
 for location in secrets:
     location_info = location
     try:
@@ -279,6 +292,7 @@ for location in secrets:
     else:
         data_url = location["URL"]
         wifi_connected = True
+        magtag.peripherals.neopixels[3] = (0, 255, 0)  # Green: connected
         refresh_interval_mins_ok = location["refresh_interval"]
         if (
             location["alert_default"] == "mute" and alarm_triggered is None
@@ -295,7 +309,9 @@ if not wifi_connected:
         wifi_sleep_seconds_retry,
         "seconds.",
     )
-    magtag.set_text("Can't connect to " + attempted_ssids + "!", 0)
+    magtag.peripherals.neopixels[3] = (255, 255, 0)  # Yellow: failed
+    clear_screen()
+    magtag.set_text("Error: Can't connect to WiFi!", 1)
     print("Available WiFi networks:")
     for network in wifi.radio.start_scanning_networks():
         print(f"\t{str(network.ssid, 'utf-8')}\t\tRSSI: {network.rssi}\tChannel: {network.channel}")
@@ -303,15 +319,18 @@ if not wifi_connected:
     magtag.exit_and_deep_sleep(wifi_sleep_seconds_retry)
 
 
-## Get NTP time
+## Get NTP time (Pixel 2 / 2nd Light)
 current_time = None
+magtag.peripherals.neopixels[2] = (0, 0, 255)  # Blue: syncing time
 try:
     ntp = adafruit_ntp.NTP(socket, tz_offset=0)
     current_time = ntp.datetime
     time_now_string = f"Updated at: {current_time.tm_year:d}-{current_time.tm_mon:02d}-{current_time.tm_mday:02d} {current_time.tm_hour:02d}:{current_time.tm_min:02d}Z"
     time_now_min = current_time.tm_min
+    magtag.peripherals.neopixels[2] = (0, 255, 0)  # Green: synced
 except Exception as errorMessage:  # pylint: disable=broad-except
     print("Could not get NTP time. Ignoring")
+    magtag.peripherals.neopixels[2] = (255, 255, 0)  # Yellow: failed (non-fatal)
     current_time = None
     time_now_string = "Unable to get NTP time"
     time_now_min = 59
@@ -324,22 +343,23 @@ alerting_user = False
 all_ok = True
 list_alert_silence_minutes = [5, 10, 30, 99]
 
-## Get alarm statuses from Grafana
+## Get alarm statuses from Grafana (Pixel 1: Fetch / 3rd Light, Pixel 0: Parse / 4th Light)
 
 print(data_url)
 
-## turn lights off from bootup
-magtag.peripherals.neopixel_disable = True
-
-## try to ping server here to see if reachable
-## to avoid/inform about -2 error below when can;t reach server
-
+magtag.peripherals.neopixels[1] = (0, 0, 255)  # Blue: fetching data
 try:
     with https.get(data_url) as response:
+        magtag.peripherals.neopixels[1] = (0, 255, 0)  # Green: fetched data
+        magtag.peripherals.neopixels[0] = (0, 0, 255)  # Blue: parsing JSON
         try:
             R_JSON = response.json()
+            magtag.peripherals.neopixels[0] = (0, 255, 0)  # Green: parsed JSON
         except Exception:  # pylint: disable=broad-except
             print("Could not parse json. Trying again in 60 seconds.")
+            magtag.peripherals.neopixels[0] = (255, 255, 0)  # Yellow: parse error
+            clear_screen()
+            magtag.set_text("Error: Could not parse JSON.", 1)
             magtag.exit_and_deep_sleep(60)
 
         state = DashboardState(R_JSON, config=config, current_time=current_time)
@@ -350,7 +370,13 @@ try:
         gc.collect()
 except Exception:  # pylint: disable=broad-except
     print("Could not get url. Trying again in 60 seconds.")
+    magtag.peripherals.neopixels[1] = (255, 255, 0)  # Yellow: fetch error
+    clear_screen()
+    magtag.set_text("Error: Could not reach Grafana.", 1)
     magtag.exit_and_deep_sleep(60)
+
+## Boot completed successfully - turn off LEDs before checking alert states or updating screen
+magtag.peripherals.neopixel_disable = True
 
 all_ok = state.is_all_ok
 if state.has_criticals or state.has_alerts:
