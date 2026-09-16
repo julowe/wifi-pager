@@ -24,7 +24,6 @@ import alarm
 import board
 import socketpool
 import supervisor
-import usb_cdc
 import wifi
 from adafruit_debouncer import Debouncer
 from adafruit_magtag.magtag import MagTag
@@ -32,8 +31,7 @@ from adafruit_magtag.magtag import MagTag
 import config
 from dashboard_state import DashboardState
 
-# Only activate the fast debug loop if a physical USB serial connection is active on a PC
-is_desktop_connected = bool(usb_cdc.console and usb_cdc.console.connected)
+DEBUG = False
 
 ## See if device woke from sleep, and how
 # print(alarm.wake_alarm)
@@ -58,20 +56,9 @@ if alarm_triggered is not None:
     elif isinstance(alarm_triggered, alarm.time.TimeAlarm):
         alarm_wake = "timer"
         print("Woken from sleep by timed alarm")
-    #    elif supervisor.runtime.serial_connected:
-    #        print("Yes, I am connected to serial so let's fake out the normal alarm.wake_alarm, setting alarm_wake equal to 'timer'")
-    #        alarm_wake = "timer"
     else:
         print("Woken by something else...")
-elif is_desktop_connected:
-    print(
-        "Yes, I am connected to serial so let's fake out the normal alarm.wake_alarm, setting alarm_wake equal to 'timer'"
-    )
-    alarm_wake = "timer"
-    print("all_ok_previous stored in alarm.sleep_memory[0] =", alarm.sleep_memory[0])
-    print("alarm_silence_time stored in alarm.sleep_memory[1] =", alarm.sleep_memory[1])
 else:
-    # TODO I don't think we need this, reset button will clear memory. not sure about shutdown from low power and then recharge. will test that soon.
     print("Code running for first time")
 
     if alarm.sleep_memory[0] != 0:
@@ -253,7 +240,8 @@ except ImportError:
     magtag.peripherals.neopixel_disable = False
     magtag.peripherals.neopixels.fill((255, 0, 0))
     clear_screen()
-    magtag.set_text("Error: Missing secrets.py", 1)
+    magtag.set_text("Error: Missing secrets.py", 1, False)
+    magtag.refresh()
     raise
 
 refresh_interval_mins_ok = 5
@@ -311,7 +299,8 @@ if not wifi_connected:
     )
     magtag.peripherals.neopixels[3] = (255, 255, 0)  # Yellow: failed
     clear_screen()
-    magtag.set_text("Error: Can't connect to WiFi!", 1)
+    magtag.set_text("Error: Can't connect to WiFi!", 1, False)
+    magtag.refresh()
     print("Available WiFi networks:")
     for network in wifi.radio.start_scanning_networks():
         print(f"\t{str(network.ssid, 'utf-8')}\t\tRSSI: {network.rssi}\tChannel: {network.channel}")
@@ -359,7 +348,8 @@ try:
             print("Could not parse json. Trying again in 60 seconds.")
             magtag.peripherals.neopixels[0] = (255, 255, 0)  # Yellow: parse error
             clear_screen()
-            magtag.set_text("Error: Could not parse JSON.", 1)
+            magtag.set_text("Error: Could not parse JSON.", 1, False)
+            magtag.refresh()
             magtag.exit_and_deep_sleep(60)
 
         state = DashboardState(R_JSON, config=config, current_time=current_time)
@@ -372,7 +362,8 @@ except Exception:  # pylint: disable=broad-except
     print("Could not get url. Trying again in 60 seconds.")
     magtag.peripherals.neopixels[1] = (255, 255, 0)  # Yellow: fetch error
     clear_screen()
-    magtag.set_text("Error: Could not reach Grafana.", 1)
+    magtag.set_text("Error: Could not reach Grafana.", 1, False)
+    magtag.refresh()
     magtag.exit_and_deep_sleep(60)
 
 ## Boot completed successfully - turn off LEDs before checking alert states or updating screen
@@ -457,8 +448,8 @@ else:
     UI_wait_minutes = 1
     deep_sleep_minutes = refresh_interval_mins_ok
 
-## if on desktop serial always refresh fast, also later display of variables to actually show up in serial with late connect to /dev/tty...
-if is_desktop_connected:
+## if connected to desktop USB/serial always refresh fast (0.5 mins / 30s)
+if DEBUG and supervisor.runtime.serial_connected:
     if alerting_user:
         UI_wait_minutes = 0.3  # make noise for longer, but still loop through faster than when not connected to usb
     else:
@@ -470,9 +461,9 @@ if is_desktop_connected:
 
 
 ## Check status and alarm if needed
-## refresh screen once an hour, during the first refresh interval (when not on desktop debug)
+## refresh screen once an hour, during the first refresh interval (when not on serial debug)
 if (
-    not is_desktop_connected
+    not supervisor.runtime.serial_connected
     and all_ok_previous
     and all_ok
     and alarm_wake == "timer"
@@ -541,9 +532,11 @@ else:
 
         # Display status of alerts
         if all_ok:
-            magtag.set_text(display_text, 1)
+            magtag.set_text(display_text, 1, False)
         else:
-            magtag.set_text(display_text, 0)
+            magtag.set_text(display_text, 0, False)
+
+        magtag.refresh()
 
     except Exception:  # pylint: disable=broad-except
         print("Could not update display.")
@@ -640,7 +633,8 @@ else:
                         # magtag.set_text("Return to Main", 4, False)
 
                         # Display full list of all_ok alerts (which all are, if not in alerting_user state)
-                        magtag.set_text(text_ok, 2)
+                        magtag.set_text(text_ok, 2, False)
+                        magtag.refresh()
                         break
 
                     if screen_name == "long-ok":
@@ -676,7 +670,8 @@ else:
                         )
 
                         # Display concise all ok status
-                        magtag.set_text(display_text, 1)
+                        magtag.set_text(display_text, 1, False)
+                        magtag.refresh()
                         break
                 # if i == 1:
                 # keep lights on for a shake after being pressed
@@ -749,16 +744,5 @@ pin_alarm = alarm.pin.PinAlarm(pin=board.D11, value=False, pull=True)
 
 print(supervisor.runtime.run_reason)
 
-if is_desktop_connected:
-    # time_fake_sleep = 15
-    print(
-        "Yes, I am connected to serial, sleeping for",
-        deep_sleep_minutes * 60,
-        "seconds",
-    )
-    time.sleep(deep_sleep_minutes * 60)
-    supervisor.reload()
-else:
-    ## sleep for deep_sleep_minutes or until D11 button pressed
-    # alarm_triggered = alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
-    alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
+## sleep for deep_sleep_minutes (30s on serial, or 30m on battery) or until D11 button pressed
+alarm.exit_and_deep_sleep_until_alarms(time_alarm, pin_alarm)
