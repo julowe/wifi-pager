@@ -24,12 +24,16 @@ import alarm
 import board
 import socketpool
 import supervisor
+import usb_cdc
 import wifi
 from adafruit_debouncer import Debouncer
 from adafruit_magtag.magtag import MagTag
 
 import config
 from dashboard_state import DashboardState
+
+# Only activate the fast debug loop if a physical USB serial connection is active on a PC
+is_desktop_connected = bool(usb_cdc.console and usb_cdc.console.connected)
 
 ## See if device woke from sleep, and how
 # print(alarm.wake_alarm)
@@ -59,7 +63,7 @@ if alarm_triggered is not None:
     #        alarm_wake = "timer"
     else:
         print("Woken by something else...")
-elif supervisor.runtime.serial_connected:
+elif is_desktop_connected:
     print(
         "Yes, I am connected to serial so let's fake out the normal alarm.wake_alarm, setting alarm_wake equal to 'timer'"
     )
@@ -427,8 +431,8 @@ else:
     UI_wait_minutes = 1
     deep_sleep_minutes = refresh_interval_mins_ok
 
-## if on serial always refresh fast, also later display of variables to actually show up in serial with late connect to /dev/tty...
-if supervisor.runtime.serial_connected:
+## if on desktop serial always refresh fast, also later display of variables to actually show up in serial with late connect to /dev/tty...
+if is_desktop_connected:
     if alerting_user:
         UI_wait_minutes = 0.3  # make noise for longer, but still loop through faster than when not connected to usb
     else:
@@ -440,9 +444,10 @@ if supervisor.runtime.serial_connected:
 
 
 ## Check status and alarm if needed
-## refresh screen once an hour, during the first refresh interval
+## refresh screen once an hour, during the first refresh interval (when not on desktop debug)
 if (
-    all_ok_previous
+    not is_desktop_connected
+    and all_ok_previous
     and all_ok
     and alarm_wake == "timer"
     and time_now_min >= refresh_interval_mins_ok
@@ -717,7 +722,7 @@ pin_alarm = alarm.pin.PinAlarm(pin=board.D11, value=False, pull=True)
 
 print(supervisor.runtime.run_reason)
 
-if supervisor.runtime.serial_connected:
+if is_desktop_connected:
     # time_fake_sleep = 15
     print(
         "Yes, I am connected to serial, sleeping for",
