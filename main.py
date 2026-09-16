@@ -468,9 +468,10 @@ else:
         else:
             battery_display_string = "battery:"
 
-        # Display updated time
+        # Display updated time, battery, and IP
+        ip_display_string = f", IP: {wifi.radio.ipv4_address}" if wifi.radio.ipv4_address else ""
         magtag.set_text(
-            time_now_string + ", " + battery_display_string + f" {magtag.peripherals.battery:.2f}V",
+            f"{time_now_string}, {battery_display_string} {magtag.peripherals.battery:.2f}V{ip_display_string}",
             3,
             False,
         )
