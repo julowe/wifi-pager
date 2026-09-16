@@ -1,0 +1,4 @@
+# This file is used to allow update over wifi (OTA)
+CIRCUITPY_WIFI_SSID = "your_wifi_ssid"
+CIRCUITPY_WIFI_PASSWORD = "your_wifi_password"
+CIRCUITPY_WEB_API_PASSWORD = "your_api_password" # Set a password to protect web access

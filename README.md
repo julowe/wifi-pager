@@ -60,6 +60,30 @@ Tested and compatible with CircuitPython 10.x (specifically CircuitPython 10.2.1
      - `simpleio.mpy`
      - `adafruit_ticks.mpy`
 
+### Web Workflow (Over-the-Air Updates)
+
+CircuitPython 8.0.0 and later includes a built-in "Web Workflow" feature that allows you to connect to the MagTag over WiFi to upload code, view the serial console, and restart the device without needing a USB connection.
+
+1. **Configure `settings.toml`:**
+   At the root of your `CIRCUITPY` drive, create or edit a file named `settings.toml` (do not use `.py`) with your network and API credentials:
+
+   ```toml
+   CIRCUITPY_WIFI_SSID = "your_wifi_ssid"
+   CIRCUITPY_WIFI_PASSWORD = "your_wifi_password"
+   CIRCUITPY_WEB_API_PASSWORD = "your_api_password" # Set a password to protect web access
+   ```
+
+   _(Note: The Web Workflow uses `settings.toml` to connect to WiFi in the background. The `secrets.py` file is still used by the pager application logic itself to support multiple locations/Grafana URLs)._
+
+2. **Accessing the Web Interface:**
+   - Once connected to WiFi, open a web browser on the same network and navigate to `http://circuitpython.local/` (or the device's IP address if mDNS doesn't work).
+   - Enter the `CIRCUITPY_WEB_API_PASSWORD` you set in `settings.toml`.
+
+3. **Features:**
+   - **File Manager:** Upload, download, edit, and delete files (like `main.py` or `secrets.py`) directly from your browser.
+   - **Serial Console:** View the live serial output to debug errors or print statements remotely.
+   - **Restart:** Soft-reboot the device instantly after uploading new code.
+
 ### Development Environment & Testing
 
 #### Setting Up with uv
