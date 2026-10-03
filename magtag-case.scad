@@ -240,9 +240,7 @@ gasket_individual_button_rounding_rad = 1;
 
 gasket_individual_button_z = case_top_z + gasket_individual_button_rounding_rad; //last term is how tall above case to make button stick out (suggest it be equal to or greater than rounding rad, otherwise button will besmaller than hole at top of case). if you change this term also need to make sure term in button_sheath module doesn't screw up the join of sheath to gasket
 
-
-button_to_tpu_gap = 0.2;
-
+button_to_tpu_gap = 0.0;
 
 
 /*************************************
